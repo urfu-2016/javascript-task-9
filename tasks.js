@@ -99,10 +99,6 @@ function addHTMLMarkdown(data, callback) {
  * @param {Function} callback
  */
 exports.loadOne = function (task, callback) {
-    // console.info(task, callback);
-    // github.repoInfo(task, function (err, res) {
-    // console.log(err, res);
-    // });
     var repoData = { 'name': task };
     flow.serial([
         addData(github.repoInfo, task, ['name', 'description']).bind(null, repoData),
