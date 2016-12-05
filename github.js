@@ -2,8 +2,13 @@
 
 var fs = require('fs');
 var http = require('https');
-var token = fs.readFileSync('token.txt', 'utf-8');
 
+var token;
+try {
+    token = fs.readFileSync('token.txt', 'utf-8');
+} catch (e) {
+    console.info('no file');
+}
 
 function handleError(req, callback) {
     req.on('error', function (err) {
