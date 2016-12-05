@@ -1,5 +1,6 @@
 'use strict';
 
+var flow = require('flow.gallyam');
 /**
  * Сделано задание на звездочку
  * Реализовано получение html
@@ -12,7 +13,16 @@ exports.isStar = true;
  * @param {Function} callback
  */
 exports.getList = function (category, callback) {
-    console.info(category, callback);
+    switch (category) {
+        case 'markup':
+            break;
+        case 'javascript':
+            break;
+        case 'demo':
+            break;
+        default:
+            throw new Error('Unknown category: ' + category);
+    }
 };
 
 /**
