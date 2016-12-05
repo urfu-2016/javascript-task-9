@@ -21,8 +21,7 @@ function getOptions(path) {
         host: GITHUB,
         path: path,
         headers: {
-            'User-Agent': USER_AGENT,
-            'Accept': 'application/vnd.github.VERSION.raw'
+            'User-Agent': USER_AGENT
         }
     };
 }
@@ -34,13 +33,12 @@ function postOptions(path) {
         path: path,
         headers: {
             'User-Agent': USER_AGENT,
-            'Content-Type': 'text/plain',
-            'Accept': 'application/vnd.github.VERSION.raw'
+            'Content-Type': 'text/plain'
         }
     };
 }
 
-function getString(options, callback) {
+function getString(options, callback, data) {
     function requestCallback(response) {
         var buffer = '';
         var callbackCalled = false;
@@ -61,33 +59,11 @@ function getString(options, callback) {
         });
     }
 
-    https.request(options, requestCallback).end();
-}
-
-function postString(options, data, callback) {
-    function requestCallback(response) {
-        var buffer = '';
-        var callbackCalled = false;
-
-        response.on('data', function (chunk) {
-            buffer += chunk;
-        });
-
-        response.on('error', function (error) {
-            callbackCalled = true;
-            callback(error, null);
-        });
-
-        response.on('end', function () {
-            if (!callbackCalled) {
-                callback(null, buffer);
-            }
-        });
+    var request = https.request(options, requestCallback);
+    if (data) {
+        request.write(data);
     }
-
-    var req = https.request(options, requestCallback);
-    req.write(data);
-    req.end();
+    request.end();
 }
 
 /**
@@ -132,11 +108,11 @@ exports.loadOne = function (task, callback) {
         flow.makeAsync(function (data) {
             return {
                 data: JSON.parse(data[0]),
-                markdown: data[1]
+                markdown: new Buffer(JSON.parse(data[1]).content, 'base64').toString('utf8')
             };
         }),
         function (data, next) {
-            postString(postOptions(MARKDOWN), data.markdown, function (error, html) {
+            getString(postOptions(MARKDOWN), function (error, html) {
                 console.info(html);
                 next(error, {
                     name: data.data.name,
@@ -144,7 +120,7 @@ exports.loadOne = function (task, callback) {
                     markdown: data.markdown,
                     html: html
                 });
-            });
+            }, data.markdown);
         }
     ], callback);
 };
