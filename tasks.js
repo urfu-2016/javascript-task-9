@@ -36,7 +36,12 @@ function getTemplate(category) {
  * @param {Function} callback
  */
 exports.getList = function (category, callback) {
-    var template = getTemplate(category);
+    var template;
+    try {
+        template = getTemplate(category);
+    } catch (err) {
+        callback(err, null);
+    }
     github.repoList(function (err, res) {
         if (!err) {
             var tasks = [];
@@ -76,7 +81,11 @@ function addData(func, task, fields, addFields) {
 }
 
 function contentToMarkdown(data, callback) {
-    data.markdown = new Buffer(data.content, data.encoding).toString('utf-8');
+    try {
+        data.markdown = new Buffer(data.content, data.encoding).toString('utf-8');
+    } catch (err) {
+        callback(err, null);
+    }
     delete data.content;
     delete data.encoding;
     callback(null, data);
@@ -105,7 +114,6 @@ exports.loadOne = function (task, callback) {
         addData(github.repoInfo, task + '/readme', ['content', 'encoding']),
         contentToMarkdown,
         addHTMLMarkdown
-
     ], function (err, data) {
         callback(err, data);
     });
