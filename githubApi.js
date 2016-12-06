@@ -21,16 +21,22 @@ function buildOptions(apiMethod, apiParam) {
 
 function getSubscriberToReadData(callback) {
     return function (request) {
+        var errorHappend = false;
         var data = '';
 
-        request.on('error', callback);
+        request.on('error', function (error) {
+            errorHappend = true;
+            callback(error);
+        });
 
         request.on('data', function (chunk) {
             data += chunk;
         });
 
         request.on('end', function () {
-            callback(null, data);
+            if (!errorHappend) {
+                callback(null, data);
+            }
         });
     };
 }
