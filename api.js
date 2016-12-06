@@ -23,7 +23,11 @@ function makeRequest(options, headers, isJson, callback) {
 
         response.on('end', function () {
             if (isJson) {
-                callback(null, JSON.parse(body));
+                try {
+                    callback(null, JSON.parse(body));
+                } catch (error) {
+                    callback(error);
+                }
             } else {
                 callback(null, body);
             }
