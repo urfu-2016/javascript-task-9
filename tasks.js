@@ -9,12 +9,20 @@ var flow = require('flow.js');
  */
 exports.isStar = true;
 
+var ALLOWED_CATEGORIES = ['demo', 'javascript', 'markup'];
+
 /**
  * Получение списка задач
  * @param {String} category – категория задач (javascript или markup)
  * @param {Function} callback
  */
 exports.getList = function (category, callback) {
+    if (ALLOWED_CATEGORIES.indexOf(category) === -1) {
+        callback(new Error('invalid category'));
+
+        return;
+    }
+
     api.getOrganizationRepos('urfu-2016', function (error, repos) {
         if (error) {
             callback(error);
@@ -22,9 +30,10 @@ exports.getList = function (category, callback) {
             return;
         }
 
+        var taskNameStart = category + '-task';
         var result = repos
             .filter(function (repo) {
-                return repo.name.startsWith(category + '-task');
+                return repo.name.startsWith(taskNameStart);
             })
             .map(function (repo) {
                 return {
