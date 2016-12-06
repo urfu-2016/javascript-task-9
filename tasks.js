@@ -10,12 +10,18 @@ var flow = require('flow');
 exports.isStar = true;
 
 function formatRepoInfo(fullRepoInfo) {
-    return {
+    var result = {
         name: fullRepoInfo.name,
-        description: fullRepoInfo.description,
-        markdown: fullRepoInfo.markdown,
-        html: fullRepoInfo.html
+        description: fullRepoInfo.description
     };
+    if (fullRepoInfo.markdown) {
+        result.markdown = fullRepoInfo.markdown;
+    }
+    if (fullRepoInfo.html) {
+        result.html = fullRepoInfo.html;
+    }
+
+    return result;
 }
 
 /**
