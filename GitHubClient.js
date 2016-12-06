@@ -12,7 +12,7 @@ function createDefaultOptions(token, path, method) {
         method: method || 'GET',
         path: path,
         headers: {
-            'Authorization': 'Basic ' + new Buffer('Gebon:' + token).toString('base64'),
+            'Authorization': 'Basic ' + new Buffer(':' + token).toString('base64'),
             'Content-Type': 'text/plain;charset=utf-8',
             'User-Agent': 'Gallyam repo browser'
         }
