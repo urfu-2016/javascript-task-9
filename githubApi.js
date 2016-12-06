@@ -46,7 +46,11 @@ function makeJsonCallback(callback) {
         if (error) {
             callback(error);
         } else {
-            callback(null, JSON.parse(result));
+            try {
+                callback(null, JSON.parse(result));
+            } catch (e) {
+                callback(e);
+            }
         }
     };
 }
