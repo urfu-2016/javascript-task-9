@@ -45,32 +45,28 @@ function makeRequest(options, headers, isJson, callback) {
 
         });
     });
-    request.on('timeout', function () {
-        callback(new Error('timeout'));
-    });
-    request.on('error', function () {
-        callback(new Error('network error'));
-    });
+    request.on('timeout', callback);
+    request.on('error', callback);
 
     return request;
 }
 
 exports.getOrganizationRepos = function (organization, callback) {
-    var path = '/orgs/' + organization + '/repos?access_API_TOKEN=' + API_TOKEN;
+    var path = '/orgs/' + organization + '/repos?access_token=' + API_TOKEN;
 
     var request = makeRequest({ path: path }, {}, true, callback);
     request.end();
 };
 
 exports.getRepo = function (owner, repo, callback) {
-    var path = '/repos/' + owner + '/' + repo + '?access_API_TOKEN=' + API_TOKEN;
+    var path = '/repos/' + owner + '/' + repo + '?access_token=' + API_TOKEN;
 
     var request = makeRequest({ path: path }, {}, true, callback);
     request.end();
 };
 
 exports.getReadme = function (owner, repo, callback) {
-    var path = '/repos/' + owner + '/' + repo + '/readme?access_API_TOKEN=' + API_TOKEN;
+    var path = '/repos/' + owner + '/' + repo + '/readme?access_token=' + API_TOKEN;
 
     var request = makeRequest({ path: path }, {}, true, callback);
     request.end();
@@ -78,7 +74,7 @@ exports.getReadme = function (owner, repo, callback) {
 
 exports.renderMarkdown = function (text, callback) {
     var options = {
-        path: '/markdown/raw?access_API_TOKEN=' + API_TOKEN,
+        path: '/markdown/raw?access_token=' + API_TOKEN,
         method: 'POST'
     };
     var headers = {
