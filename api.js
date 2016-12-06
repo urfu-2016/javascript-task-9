@@ -2,8 +2,9 @@
 
 var https = require('https');
 var fs = require('fs');
+var path_ = require('path');
 
-var API_TOKEN = fs.readFileSync('token.txt', 'ascii').trim();
+var API_TOKEN = fs.readFileSync(path_.join(__dirname, 'token.txt'), 'ascii').trim();
 var API_HOST = 'api.github.com';
 
 function makeRequest(options, headers, isJson, callback) {
