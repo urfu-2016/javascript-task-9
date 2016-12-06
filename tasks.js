@@ -1,5 +1,10 @@
 'use strict';
 
+var flow = require('flow');
+var GithubRepositoriesAPI = require('./api.js');
+
+var API = new GithubRepositoriesAPI('urfu-2016', 'token.txt');
+
 /**
  * Сделано задание на звездочку
  * Реализовано получение html
@@ -12,7 +17,16 @@ exports.isStar = true;
  * @param {Function} callback
  */
 exports.getList = function (category, callback) {
-    console.info(category, callback);
+    var format = function (task) {
+        return { name: task.name, description: task.description };
+    };
+
+    API.getAllByCategory(category, function (error, data) {
+        if (error) {
+            callback(error);
+        }
+        flow.map(data, format, callback);
+    });
 };
 
 /**
@@ -21,5 +35,5 @@ exports.getList = function (category, callback) {
  * @param {Function} callback
  */
 exports.loadOne = function (task, callback) {
-    console.info(task, callback);
+    API.getTaskById(task, callback);
 };
