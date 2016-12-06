@@ -25,26 +25,20 @@ exports.isStar = true;
  * @param {Function} callback
  */
 exports.getList = function (category, callback) {
-    if (['markup', 'javascript', 'demo'].indexOf(category) === -1) {
-        throw new Error('Unknown category: ' + category);
-    }
-
-    gitHubClient.getRepos(function (error, data) {
-        if (error) {
-            callback(error);
-        } else {
-            callback(null, data
-                .filter(function (repo) {
-                    return repo.name.match(category + '-task-\\d+');
-                })
-                .map(function (repo) {
-                    return {
-                        name: repo.name,
-                        description: repo.description
-                    };
-                }));
-        }
-    });
+    flow.serial([
+        gitHubClient.getRepos,
+        flow.makeAsync(function (data) {
+            return data.filter(function (repo) {
+                return repo.name.match(category + '-task-\\d+');
+            })
+            .map(function (repo) {
+                return {
+                    name: repo.name,
+                    description: repo.description
+                };
+            });
+        })
+    ], callback);
 };
 
 /**
