@@ -23,20 +23,12 @@ function makeRequest(options, headers, isJson, callback) {
 
         response.on('end', function () {
             if (isJson) {
-                var result = JSON.parse(body);
-
-                if ('message' in result) {
-                    callback(new Error(result.message));
-                } else {
-                    callback(null, result);
-                }
+                callback(null, JSON.parse(body));
             } else {
                 callback(null, body);
             }
-
         });
     });
-    request.on('timeout', callback);
     request.on('error', callback);
 
     return request;
