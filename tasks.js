@@ -9,6 +9,15 @@ var flow = require('flow');
  */
 exports.isStar = true;
 
+function formatRepoInfo(fullRepoInfo) {
+    return {
+        name: fullRepoInfo.name,
+        description: fullRepoInfo.description,
+        markdown: fullRepoInfo.markdown,
+        html: fullRepoInfo.html
+    };
+}
+
 /**
  * Получение списка задач
  * @param {String} category – категория задач (javascript или markup)
@@ -24,7 +33,8 @@ exports.getList = function (category, callback) {
         callback(null, results
         .filter(function (result) {
             return result.name.startsWith(category + '-task-');
-        }));
+        })
+        .map(formatRepoInfo));
     });
 };
 
@@ -55,7 +65,7 @@ exports.loadOne = function (task, callback) {
                     return;
                 }
                 repoInfo.html = result;
-                innerCallback(null, repoInfo);
+                innerCallback(null, formatRepoInfo(repoInfo));
             });
         }], callback);
 };
