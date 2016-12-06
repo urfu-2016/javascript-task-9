@@ -1,15 +1,6 @@
 'use strict';
 
 var https = require('https');
-var fs = require('fs');
-var path_ = require('path');
-
-var API_TOKEN;
-try {
-    API_TOKEN = fs.readFileSync(path_.join(__dirname, 'token.txt'), 'ascii').trim();
-} catch (error) {
-    API_TOKEN = '';
-}
 
 var API_HOST = 'api.github.com';
 
@@ -52,21 +43,21 @@ function makeRequest(options, headers, isJson, callback) {
 }
 
 exports.getOrganizationRepos = function (organization, callback) {
-    var path = '/orgs/' + organization + '/repos?access_token=' + API_TOKEN;
+    var path = '/orgs/' + organization + '/repos';
 
     var request = makeRequest({ path: path }, {}, true, callback);
     request.end();
 };
 
 exports.getRepo = function (owner, repo, callback) {
-    var path = '/repos/' + owner + '/' + repo + '?access_token=' + API_TOKEN;
+    var path = '/repos/' + owner + '/' + repo;
 
     var request = makeRequest({ path: path }, {}, true, callback);
     request.end();
 };
 
 exports.getReadme = function (owner, repo, callback) {
-    var path = '/repos/' + owner + '/' + repo + '/readme?access_token=' + API_TOKEN;
+    var path = '/repos/' + owner + '/' + repo + '/readme';
 
     var request = makeRequest({ path: path }, {}, true, callback);
     request.end();
@@ -74,7 +65,7 @@ exports.getReadme = function (owner, repo, callback) {
 
 exports.renderMarkdown = function (text, callback) {
     var options = {
-        path: '/markdown/raw?access_token=' + API_TOKEN,
+        path: '/markdown/raw',
         method: 'POST'
     };
     var headers = {

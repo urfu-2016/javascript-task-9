@@ -9,20 +9,12 @@ var flow = require('flow.js');
  */
 exports.isStar = true;
 
-var ALLOWED_CATEGORIES = ['demo', 'javascript', 'markup'];
-
 /**
  * Получение списка задач
  * @param {String} category – категория задач (javascript или markup)
  * @param {Function} callback
  */
 exports.getList = function (category, callback) {
-    if (ALLOWED_CATEGORIES.indexOf(category) === -1) {
-        callback(1);
-
-        return;
-    }
-
     api.getOrganizationRepos('urfu-2016', function (error, repos) {
         if (error) {
             callback(error);
@@ -60,7 +52,10 @@ exports.loadOne = function (task, callback) {
                     return;
                 }
 
-                next(null, { repo: repo });
+                next(null, {
+                    name: repo.name,
+                    description: repo.description
+                });
             });
         },
 
@@ -72,13 +67,13 @@ exports.loadOne = function (task, callback) {
                     return;
                 }
 
-                data.readme = new Buffer(readme.content, readme.encoding).toString('utf-8');
+                data.markdown = new Buffer(readme.content, readme.encoding).toString('utf-8');
                 next(null, data);
             });
         },
 
         function (data, next) {
-            api.renderMarkdown(data.readme, function (error, html) {
+            api.renderMarkdown(data.markdown, function (error, html) {
                 if (error) {
                     next(error);
 
@@ -89,19 +84,5 @@ exports.loadOne = function (task, callback) {
                 next(null, data);
             });
         }
-    ], function (error, data) {
-        if (error) {
-            callback(error);
-
-            return;
-        }
-
-        callback(null, {
-            name: data.repo.name,
-            description: data.repo.description,
-            markdown: data.readme,
-            html: data.html
-        });
-    });
-
+    ], callback);
 };
