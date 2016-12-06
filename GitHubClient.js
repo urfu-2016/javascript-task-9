@@ -12,7 +12,8 @@ function createDefaultOptions(token, path, method) {
         method: method || 'GET',
         path: path,
         headers: {
-            'Authorization': 'Basic ' + new Buffer(':' + token).toString('base64'),
+            'Authorization': 'Basic ' + new Buffer('Gebon:' + token).toString('base64'),
+            'Content-Type': 'text/plain;charset=utf-8',
             'User-Agent': 'Gallyam repo browser'
         }
     };
@@ -29,7 +30,7 @@ function makeRequest(options, next, postData) {
                 next(null, content);
             });
         }).on('error', next);
-    if (postData) {
+    if (typeof(postData) === 'string') {
         request.write(postData);
     }
     request.end();
@@ -40,6 +41,7 @@ function GitHubClient(token) {
 }
 
 function applyOperationsWithPreprocessing(options, callback, operations) {
+    options.headers['Accept-Encoding'] = 'cp1251';
     operations = [makeRequest.bind(null, options), flow.makeAsync(JSON.parse)]
         .concat(operations || []);
     flow.serial(operations, callback);

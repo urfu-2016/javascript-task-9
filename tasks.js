@@ -26,7 +26,7 @@ exports.isStar = true;
  */
 exports.getList = function (category, callback) {
     flow.serial([
-        gitHubClient.getRepos,
+        gitHubClient.getRepos.bind(gitHubClient),
         flow.makeAsync(function (data) {
             return data.filter(function (repo) {
                 return repo.name.match(category + '-task-\\d+');

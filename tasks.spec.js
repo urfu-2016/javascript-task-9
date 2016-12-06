@@ -1,5 +1,5 @@
 /* eslint-env mocha */
-/* eslint-disable no-shadow, max-nested-callbacks */
+/* eslint-disable no-shadow, max-nested-callbacks, no-unused-vars, no-invalid-this */
 'use strict';
 
 var fs = require('fs');
@@ -14,27 +14,28 @@ var repoPayload = require('./payloads/repo');
 var readmePayload = require('./payloads/readme');
 
 var md = fs.readFileSync(path.join(__dirname, 'payloads', 'readme.md'), { encoding: 'utf-8' });
-var html = fs.readFileSync(path.join(__dirname, 'payloads', 'readme.md'), { encoding: 'utf-8' });
+var html = fs.readFileSync(path.join(__dirname, 'payloads', 'readme.html'), { encoding: 'utf-8' });
 
-nock('https://api.github.com')
-    .get('/orgs/urfu-2016/repos')
-    .query(true)
-    .reply(200, reposPayload)
+// nock('https://api.github.com')
+//     .get('/orgs/urfu-2016/repos')
+//     .query(true)
+//     .reply(200, reposPayload)
 
-    .get('/repos/urfu-2016/javascript-task-1')
-    .query(true)
-    .reply(200, repoPayload)
+//     .get('/repos/urfu-2016/javascript-task-1')
+//     .query(true)
+//     .reply(200, repoPayload)
 
-    .get('/repos/urfu-2016/javascript-task-1/readme')
-    .query(true)
-    .reply(200, readmePayload)
+//     .get('/repos/urfu-2016/javascript-task-1/readme')
+//     .query(true)
+//     .reply(200, readmePayload)
 
-    .post('/markdown/raw', /«XXL»/)
-    .query(true)
-    .reply(200, html)
-;
+//     .post('/markdown/raw', /«XXL»/)
+//     .query(true)
+//     .reply(200, html)
+// ;
 
 describe('tasks', function () {
+    this.timeout(60 * 1000);
     it('должен возвращать список задач по категории', function (done) {
         tasks.getList('javascript', function (err, data) {
             assert.ifError(err);
@@ -46,7 +47,8 @@ describe('tasks', function () {
                 4: 'Задача «Картофельная вечеринка Билли»',
                 5: 'Задача «Пора на лекцию»',
                 7: 'Задача «Свадьба Билли»',
-                8: 'Задача «Котофайлы»'
+                8: 'Задача «Котофайлы»',
+                9: 'Задача «Просмотрщик задач»'
             };
 
             var expected = Object.keys(tasks).map(function (number) {
