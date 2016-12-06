@@ -4,7 +4,14 @@ var GitHubClient = require('./GitHubClient.js');
 var fs = require('fs');
 var flow = require('flow.gallyam');
 
-var gitHubClient = new GitHubClient(fs.readFileSync('token.txt'));
+var token;
+try {
+    token = fs.readFileSync('token.txt', 'utf-8');
+} catch (e) {
+    console.info('There is no token file');
+}
+
+var gitHubClient = new GitHubClient(token);
 
 /**
  * Сделано задание на звездочку
