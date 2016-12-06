@@ -60,11 +60,11 @@ exports.loadOne = function (task, callback) {
                     return;
                 }
 
-                next(null, repo);
+                next(null, { repo: repo });
             });
         },
 
-        function (repo, next) {
+        function (data, next) {
             api.getReadme('urfu-2016', task, function (error, readme) {
                 if (error) {
                     next(error);
@@ -72,10 +72,8 @@ exports.loadOne = function (task, callback) {
                     return;
                 }
 
-                next(null, {
-                    repo: repo,
-                    readme: new Buffer(readme.content, readme.encoding).toString('utf-8')
-                });
+                data.readme = new Buffer(readme.content, readme.encoding).toString('utf-8');
+                next(null, data);
             });
         },
 
