@@ -22,12 +22,12 @@ function createDefaultOptions(token, path, method) {
 function makeRequest(options, next, postData) {
     var request = https.request(options,
         function (response) {
-            var content = '';
+            var content = [];
             response.on('data', function (chunk) {
-                content += chunk;
+                content.push(chunk);
             });
             response.on('end', function () {
-                next(null, content);
+                next(null, Buffer.concat(content).toString());
             });
         }).on('error', next);
     if (typeof(postData) === 'string') {
@@ -41,7 +41,6 @@ function GitHubClient(token) {
 }
 
 function applyOperationsWithPreprocessing(options, callback, operations) {
-    options.headers['Accept-Encoding'] = 'cp1251';
     operations = [makeRequest.bind(null, options), flow.makeAsync(JSON.parse)]
         .concat(operations || []);
     flow.serial(operations, callback);
