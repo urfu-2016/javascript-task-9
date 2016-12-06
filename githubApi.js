@@ -21,22 +21,16 @@ function buildOptions(apiMethod, apiParam) {
 
 function getSubscriberToReadData(callback) {
     return function (request) {
-        var errorHappend = false;
         var data = '';
 
-        request.on('error', function (error) {
-            errorHappend = true;
-            callback(error);
-        });
+        request.on('error', callback);
 
         request.on('data', function (chunk) {
             data += chunk;
         });
 
         request.on('end', function () {
-            if (!errorHappend) {
-                callback(null, data);
-            }
+            callback(null, data);
         });
     };
 }
@@ -69,8 +63,13 @@ exports.getRepoReadme = function (repo, callback) {
 
                 return;
             }
-            var readmeInfo = JSON.parse(result);
-            callback(null, new Buffer(readmeInfo.content, readmeInfo.encoding).toString('utf-8'));
+            try {
+                var readmeInfo = JSON.parse(result);
+                callback(null, new Buffer(readmeInfo.content, readmeInfo.encoding)
+                    .toString('utf-8'));
+            } catch (e) {
+                callback(e);
+            }
         }));
     request.end();
 };
