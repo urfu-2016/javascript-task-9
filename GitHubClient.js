@@ -18,29 +18,20 @@ function createDefaultOptions(token, path, method) {
     };
 }
 
-function createRequest(options, callback) {
-    return https.request(options,
+function makeRequest(options, next, postData) {
+    var request = https.request(options,
         function (response) {
             var content = '';
             response.on('data', function (chunk) {
                 content += chunk;
             });
             response.on('end', function () {
-                callback(null, content);
+                next(null, content);
             });
-        }).on('error', function (error) {
-            callback(error);
-        });
-}
-
-function makeGetRequest(options, next) {
-    var request = createRequest(options, next);
-    request.end();
-}
-
-function makePostRequest(options, postData, next) {
-    var request = createRequest(options, next);
-    request.write(postData);
+        }).on('error', next);
+    if (postData) {
+        request.write(postData);
+    }
     request.end();
 }
 
@@ -48,36 +39,34 @@ function GitHubClient(token) {
     this.token = token;
 }
 
+function applyOperationsWithPreprocessing(options, callback, operations) {
+    operations = [makeRequest.bind(null, options), flow.makeAsync(JSON.parse)]
+        .concat(operations || []);
+    flow.serial(operations, callback);
+}
+
 GitHubClient.prototype.getRepos = function (callback) {
     var options = createDefaultOptions(this.token, '/orgs/urfu-2016/repos');
-    flow.serial([
-        makeGetRequest.bind(null, options),
-        flow.makeAsync(JSON.parse)
-    ], callback);
+    applyOperationsWithPreprocessing(options, callback);
 };
 
 GitHubClient.prototype.getRepo = function (repoName, callback) {
     var options = createDefaultOptions(this.token, '/repos/urfu-2016/' + repoName);
-    flow.serial([
-        makeGetRequest.bind(null, options),
-        flow.makeAsync(JSON.parse)
-    ], callback);
+    applyOperationsWithPreprocessing(options, callback);
 };
 
 GitHubClient.prototype.getFileContent = function (repoName, fileName, callback) {
     var options = createDefaultOptions(this.token, '/repos/urfu-2016/' + repoName + '/' + fileName);
-    flow.serial([
-        makeGetRequest.bind(null, options),
-        flow.makeAsync(JSON.parse),
+    applyOperationsWithPreprocessing(options, callback, [
         flow.makeAsync(function (data) {
             return new Buffer(data.content, 'base64').toString('utf8');
         })
-    ], callback);
+    ]);
 };
 
 GitHubClient.prototype.renderMarkdown = function (markdown, callback) {
     var options = createDefaultOptions(this.token, '/markdown/raw', 'POST');
-    makePostRequest(options, markdown, callback);
+    makeRequest(options, callback, markdown);
 };
 
 module.exports = GitHubClient;
