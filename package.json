@@ -8,6 +8,8 @@
   "dependencies": {
     "eslint": "3.7.0",
     "eslint-config-hrundel": "latest",
+    "flow": "git+https://github.com/FoKycHuK/javascript-task-8.git#b0a6040a8aea2f70d94393a9cd604b42972099ca",
+    "lint": "1.1.2",
     "mocha": "3.1.0",
     "nock": "9.0.2"
   }
