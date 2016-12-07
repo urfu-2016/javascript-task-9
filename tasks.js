@@ -15,7 +15,7 @@ exports.isStar = true;
  * @param {Function} callback
  */
 exports.getList = function (category, callback) {
-    github.getRepos({ 'orgs': 'urfu-2016' }, function (err, repos) {
+    github.getRepos('orgs', 'urfu-2016', function (err, repos) {
         if (err) {
             callback(err);
         } else {
@@ -40,10 +40,10 @@ exports.getList = function (category, callback) {
 exports.loadOne = function (task, callback) {
     flow.parallel([
         function (next) {
-            github.getRepo({ 'urfu-2016': task }, next);
+            github.getRepo('urfu-2016', task, next);
         },
         function (next) {
-            github.getReadme({ 'urfu-2016': task }, next);
+            github.getReadme('urfu-2016', task, next);
         }
     ], Infinity, function (err, data) {
         if (err) {
