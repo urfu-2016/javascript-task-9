@@ -78,18 +78,18 @@ exports.loadOne = function (task, callback) {
         var body = JSON.parse(data.body);
 
 
-        function readmeLoadFileCallback(next, error, response) {
+        function readmeLoadFileCallback(nextCallback, error, response) {
             if (error) {
-                next(error, response);
+                nextCallback(error, response);
             }
 
             if (response.statusCode !== 200) {
-                next(response.statusMessage, response);
+                nextCallback(response.statusMessage, response);
             }
 
             // item.markdown = response.body.replace(/\n/g, '\r\n');
             item.markdown = response.body;
-            next(null, item);
+            nextCallback(null, item);
         }
 
         githubAPI.readmeLoadFile(body.download_url, readmeLoadFileCallback.bind(null, next));
