@@ -26,34 +26,34 @@ var REQUEST_DATA = {
     }
 };
 
-exports.getListRequest = function (responseCallback) {
+exports.getList = function (responseCallback) {
     REQUEST_DATA.path = LIST_METHOD;
     https
         .request(REQUEST_DATA, requestCallback.bind(null, responseCallback))
         .end();
 };
 
-exports.repositoryRequest = function (task, responseCallback) {
+exports.getRepository = function (task, responseCallback) {
     REQUEST_DATA.path = GET_REPO_METHOD + task;
     https
         .request(REQUEST_DATA, requestCallback.bind(null, responseCallback))
         .end();
 };
 
-exports.readmeRequest = function (task, responseCallback) {
+exports.getReadmeInfo = function (task, responseCallback) {
     REQUEST_DATA.path = GET_REPO_METHOD + task + README_METHOD;
     https
         .request(REQUEST_DATA, requestCallback.bind(null, responseCallback))
         .end();
 };
 
-exports.readmeLoadFile = function (url, responseCallback) {
+exports.getReadmeFile = function (url, responseCallback) {
     https
         .request(url, requestCallback.bind(null, responseCallback))
         .end();
 };
 
-exports.htmlReadmeRequest = function (text, responseCallback) {
+exports.getReadmeHtml = function (text, responseCallback) {
     var req = https
         .request({
             path: MARKDOWN_HTML_METHOD,

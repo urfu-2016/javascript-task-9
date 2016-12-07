@@ -21,16 +21,13 @@ exports.getList = function (category, callback) {
             callback(err);
         }
 
-        var parsedData;
         try {
-            parsedData = JSON.parse(data);
+            data = JSON.parse(data);
         } catch (e) {
             callback(e);
-
-            return;
         }
 
-        var items = parsedData
+        var items = data
             .filter(function (item) {
                 return item.name.indexOf(category + '-task') === 0;
             })
@@ -44,7 +41,7 @@ exports.getList = function (category, callback) {
         callback(null, items);
     }
 
-    githubAPI.getListRequest(responseCallback);
+    githubAPI.getList(responseCallback);
 };
 
 /**
@@ -62,8 +59,6 @@ exports.loadOne = function (task, callback) {
             data = JSON.parse(data);
         } catch (e) {
             next(e);
-
-            return;
         }
 
         var item = {
@@ -75,6 +70,16 @@ exports.loadOne = function (task, callback) {
     }
 
     function readmeCallback(next, item, err, data) {
+        if (err) {
+            next(err);
+        }
+
+        try {
+            data = JSON.parse(data);
+        } catch (e) {
+            next(e);
+        }
+
         function readmeLoadFileCallback(next, error, response) {
             if (error) {
                 next(error);
@@ -92,32 +97,20 @@ exports.loadOne = function (task, callback) {
                 next(null, item);
             }
 
-            githubAPI.htmlReadmeRequest(item.markdown, htmlReadmeCallback.bind(null, next, item));
+            githubAPI.getReadmeHtml(item.markdown, htmlReadmeCallback.bind(null, next, item));
         }
 
-        if (err) {
-            next(err);
-        }
-
-        try {
-            data = JSON.parse(data);
-        } catch (e) {
-            next(e);
-
-            return;
-        }
-
-        githubAPI.readmeLoadFile(data.download_url, readmeLoadFileCallback.bind(null, next));
+        githubAPI.getReadmeFile(data.download_url, readmeLoadFileCallback.bind(null, next));
     }
 
 
     flow.serial(
         [
             function (next) {
-                githubAPI.repositoryRequest(task, repositoryCallback.bind(null, next));
+                githubAPI.getRepository(task, repositoryCallback.bind(null, next));
             },
             function (item, next) {
-                githubAPI.readmeRequest(task, readmeCallback.bind(null, next, item));
+                githubAPI.getReadmeInfo(task, readmeCallback.bind(null, next, item));
             }
         ],
         callback
