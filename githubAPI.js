@@ -59,6 +59,7 @@ exports.getReadmeHtml = function (text, responseCallback) {
             path: MARKDOWN_HTML_METHOD,
             host: GITHUB_URL,
             method: 'POST',
+            encoding: 'utf8',
             headers: {
                 'user-agent': 'node.js',
                 'Content-Type': 'text/plain'

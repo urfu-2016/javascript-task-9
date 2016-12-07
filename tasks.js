@@ -99,7 +99,7 @@ exports.loadOne = function (task, callback) {
                     next(error);
                 }
 
-                item.html = new Buffer(response, 'utf8').toString();
+                item.html = response;
                 next(null, item);
             }
 
