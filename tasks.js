@@ -38,29 +38,23 @@ exports.getList = function (category, callback) {
  * @param {Function} callback
  */
 exports.loadOne = function (task, callback) {
-    flow.serial([
+    flow.parallel([
         function (next) {
-            github.getRepo({ 'urfu-2016': task }, function (err, repo) {
-                if (err) {
-                    next(err);
-                } else {
-                    next(null, {
-                        name: repo.name,
-                        description: repo.description
-                    });
-                }
-            });
+            github.getRepo({ 'urfu-2016': task }, next);
         },
-        function (repo, next) {
-            github.getReadme({ 'urfu-2016': task }, function (err, readme) {
-                if (err) {
-                    next(err);
-                } else {
-                    repo.markdown = readme.markdown;
-                    repo.html = readme.html;
-                    next(null, repo);
-                }
+        function (next) {
+            github.getReadme({ 'urfu-2016': task }, next);
+        }
+    ], Infinity, function (err, data) {
+        if (err) {
+            callback(err);
+        } else {
+            callback(null, {
+                name: data[0].name,
+                description: data[0].description,
+                markdown: data[1].markdown,
+                html: data[1].html
             });
         }
-    ], callback);
+    });
 };

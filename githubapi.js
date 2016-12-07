@@ -7,6 +7,13 @@ var https = require('https');
 
 var TOKEN_PATH = require('path').join(__dirname, 'token.txt');
 
+var AUTHORIZATION = '';
+fs.readFile(TOKEN_PATH, 'utf-8', function (err, token) {
+    if (!err) {
+        AUTHORIZATION = 'token ' + token.trim();
+    }
+});
+
 var requestHandler = function (req, callback) {
     req.on('response', function (response) {
         var body = '';
@@ -28,7 +35,11 @@ var requestHandler = function (req, callback) {
 };
 
 var createRequest = function (path, method, headers) {
+    headers = headers || {};
     headers['User-Agent'] = 'GitHubAPI/1.1';
+    if (AUTHORIZATION) {
+        headers.authorization = AUTHORIZATION;
+    }
 
     return https.request({
         protocol: 'https:',
@@ -40,27 +51,18 @@ var createRequest = function (path, method, headers) {
 };
 
 var request = function (path, params, callback) {
-    flow.serial([
-        function (next) {
-            fs.readFile(TOKEN_PATH, 'utf-8', function (err, token) {
-                next(null, err ? '' : '?access_token=' + token.trim());
-            });
-        },
-        function (token, next) {
-            path += token;
-            var req = createRequest(path, params.method, params.headers || {});
-            if (params.content) {
-                req.write(params.content);
-            }
-            requestHandler(req, next);
-        }
-    ], callback);
+    params = params || {};
+    var req = createRequest(path, params.method, params.headers);
+    if (params.content) {
+        req.write(params.content);
+    }
+    requestHandler(req, callback);
 };
 
 var bodyParse = function (path, callback) {
     flow.serial([
         function (next) {
-            request(path, {}, next);
+            request(path, null, next);
         },
         flow.makeAsync(JSON.parse)
     ], callback);
