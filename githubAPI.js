@@ -79,6 +79,6 @@ function requestCallback(callback, response) {
     });
 
     response.on('end', function () {
-        callback(null, responseData.toString());
+        callback(null, responseData.toString('utf8'));
     });
 }
