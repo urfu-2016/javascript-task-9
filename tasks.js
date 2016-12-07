@@ -39,19 +39,28 @@ exports.getList = function (category, callback) {
  */
 exports.loadOne = function (task, callback) {
     flow.serial([
-        github.getRepo({ 'urfu-2016': task }),
-        github.getReadme,
-        github.addHTML
-    ], function (err, repo) {
-        if (err) {
-            callback(err);
-        } else {
-            callback(null, {
-                name: repo.name,
-                description: repo.description,
-                markdown: repo.readme.markdown,
-                html: repo.readme.html
+        function (next) {
+            github.getRepo({ 'urfu-2016': task }, function (err, repo) {
+                if (err) {
+                    next(err);
+                } else {
+                    next(null, {
+                        name: repo.name,
+                        description: repo.description
+                    });
+                }
+            });
+        },
+        function (repo, next) {
+            github.getReadme({ 'urfu-2016': task }, function (err, readme) {
+                if (err) {
+                    next(err);
+                } else {
+                    repo.markdown = readme.markdown;
+                    repo.html = readme.html;
+                    next(null, repo);
+                }
             });
         }
-    });
+    ], callback);
 };
