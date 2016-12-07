@@ -25,8 +25,6 @@ exports.getList = function (category, callback) {
             data = JSON.parse(data);
         } catch (e) {
             callback(e);
-
-            return;
         }
 
         var items = data
@@ -52,68 +50,10 @@ exports.getList = function (category, callback) {
  * @param {Function} callback
  */
 exports.loadOne = function (task, callback) {
-    function repositoryCallback(next, err, data) {
-        if (err) {
-            callback(err);
-        }
-
-        try {
-            data = JSON.parse(data);
-        } catch (e) {
-            next(e);
-
-            return;
-        }
-
-        var item = {
-            name: data.name,
-            description: data.description
-        };
-
-        next(null, item);
-    }
-
-    function readmeCallback(next, item, err, data) {
-        if (err) {
-            next(err);
-        }
-
-        try {
-            data = JSON.parse(data);
-        } catch (e) {
-            next(e);
-
-            return;
-        }
-
-        function readmeLoadFileCallback(next, error, response) {
-            if (error) {
-                next(error);
-            }
-
-            // item.markdown = response.replace(/\n/g, '\r\n');
-            item.markdown = response;
-
-            function htmlReadmeCallback(next, item, error, response) {
-                if (error) {
-                    next(error);
-                }
-
-                item.html = response;
-                next(null, item);
-            }
-
-            githubAPI.getReadmeHtml(item.markdown, htmlReadmeCallback.bind(null, next, item));
-        }
-
-        githubAPI.getReadmeFile(data.download_url, readmeLoadFileCallback.bind(null, next));
-    }
-
-
     flow.serial(
         [
             function (next) {
-                githubAPI.getRepository(task, repositoryCallback.bind(null, next));
+                githubAPI.getRepository(task, repositoryCallback.bind(null, next, callback));
             },
             function (item, next) {
                 githubAPI.getReadmeInfo(task, readmeCallback.bind(null, next, item));
@@ -122,3 +62,55 @@ exports.loadOne = function (task, callback) {
         callback
     );
 };
+
+function repositoryCallback(next, callback, err, data) {
+    if (err) {
+        callback(err);
+    }
+
+    try {
+        data = JSON.parse(data);
+    } catch (e) {
+        next(e);
+    }
+
+    var item = {
+        name: data.name,
+        description: data.description
+    };
+
+    next(null, item);
+}
+
+function readmeCallback(next, item, err, response) {
+    if (err) {
+        next(err);
+    }
+
+    try {
+        response = JSON.parse(response);
+    } catch (e) {
+        next(e);
+    }
+
+    function readmeLoadFileCallback(next, error, response) {
+        if (error) {
+            next(error);
+        }
+
+        // item.markdown = response.replace(/\n/g, '\r\n');
+        item.markdown = response;
+        githubAPI.getReadmeHtml(item.markdown, htmlReadmeCallback.bind(null, next, item));
+    }
+
+    githubAPI.getReadmeFile(response.download_url, readmeLoadFileCallback.bind(null, next));
+}
+
+function htmlReadmeCallback(next, item, error, response) {
+    if (error) {
+        next(error);
+    }
+
+    item.html = response;
+    next(null, item);
+}
