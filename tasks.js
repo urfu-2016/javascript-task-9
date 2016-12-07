@@ -25,6 +25,8 @@ exports.getList = function (category, callback) {
             data = JSON.parse(data);
         } catch (e) {
             callback(e);
+
+            return;
         }
 
         var items = data
@@ -59,6 +61,8 @@ exports.loadOne = function (task, callback) {
             data = JSON.parse(data);
         } catch (e) {
             next(e);
+
+            return;
         }
 
         var item = {
@@ -78,6 +82,8 @@ exports.loadOne = function (task, callback) {
             data = JSON.parse(data);
         } catch (e) {
             next(e);
+
+            return;
         }
 
         function readmeLoadFileCallback(next, error, response) {
