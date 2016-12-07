@@ -17,14 +17,21 @@ exports.isStar = false;
 exports.getList = function (category, callback) {
     function responseCallback(err, data) {
         if (err) {
-            callback(err, null);
+            callback(err);
         }
 
         if (data.statusCode !== 200) {
-            callback(data.statusMessage, data);
+            callback(data.statusMessage);
         }
 
-        var items = JSON.parse(data.body)
+        try {
+            var parsedData = JSON.parse(data.body);
+        } catch(e) {
+            callback(e);
+            return;
+        }
+
+        var items = parsedData
             .filter(function (item) {
                 return item.name.indexOf(category + '-task') === 0;
             })
@@ -49,14 +56,19 @@ exports.getList = function (category, callback) {
 exports.loadOne = function (task, callback) {
     function repositoryCallback(next, err, data) {
         if (err) {
-            callback(err, null);
+            callback(err);
         }
 
         if (data.statusCode !== 200) {
-            next(data.statusMessage, data);
+            next(data.statusMessage);
         }
 
-        var body = JSON.parse(data.body);
+        try {
+            var body = JSON.parse(data.body);
+        } catch(e) {
+            next(e);
+            return;
+        }
 
         var item = {
             name: body.name,
@@ -67,29 +79,33 @@ exports.loadOne = function (task, callback) {
     }
 
     function readmeCallback(next, item, err, data) {
-        if (err) {
-            next(err, null);
-        }
-
-        if (data.statusCode !== 200) {
-            next(data.statusMessage, data);
-        }
-
-        var body = JSON.parse(data.body);
-
-
         function readmeLoadFileCallback(nextCallback, error, response) {
             if (error) {
-                nextCallback(error, response);
+                nextCallback(error);
             }
 
             if (response.statusCode !== 200) {
-                nextCallback(response.statusMessage, response);
+                nextCallback(response.statusMessage);
             }
 
             // item.markdown = response.body.replace(/\n/g, '\r\n');
             item.markdown = response.body;
             nextCallback(null, item);
+        }
+
+        if (err) {
+            next(err);
+        }
+
+        if (data.statusCode !== 200) {
+            next(data.statusMessage);
+        }
+
+        try {
+            var body = JSON.parse(data.body);
+        } catch(e) {
+            next(e);
+            return;
         }
 
         githubAPI.readmeLoadFile(body.download_url, readmeLoadFileCallback.bind(null, next));
