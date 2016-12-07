@@ -19,12 +19,16 @@ exports.getList = function (category, callback) {
     function responseCallback(err, data) {
         if (err) {
             callback(err);
+
+            return;
         }
 
         try {
             data = JSON.parse(data);
         } catch (e) {
             callback(e);
+
+            return;
         }
 
         var items = data
@@ -66,12 +70,16 @@ exports.loadOne = function (task, callback) {
 function repositoryCallback(next, callback, err, data) {
     if (err) {
         callback(err);
+
+        return;
     }
 
     try {
         data = JSON.parse(data);
     } catch (e) {
         next(e);
+
+        return;
     }
 
     var item = {
@@ -85,17 +93,23 @@ function repositoryCallback(next, callback, err, data) {
 function readmeCallback(next, item, err, response) {
     if (err) {
         next(err);
+
+        return;
     }
 
     try {
         response = JSON.parse(response);
     } catch (e) {
         next(e);
+
+        return;
     }
 
-    function readmeLoadFileCallback(next, error, response) {
-        if (error) {
-            next(error);
+    function readmeLoadFileCallback(next, err, response) {
+        if (err) {
+            next(err);
+
+            return;
         }
 
         // item.markdown = response.replace(/\n/g, '\r\n');
@@ -107,9 +121,11 @@ function readmeCallback(next, item, err, response) {
     githubAPI.getReadmeFile(response.download_url, readmeLoadFileCallback.bind(null, next));
 }
 
-function htmlReadmeCallback(next, item, error, response) {
-    if (error) {
-        next(error);
+function htmlReadmeCallback(next, item, err, response) {
+    if (err) {
+        next(err);
+
+        return;
     }
 
     item.html = response;
