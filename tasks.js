@@ -78,7 +78,7 @@ exports.loadOne = function (task, callback) {
         var body = JSON.parse(data.body);
 
 
-        function readmeLoadFileCallback(error, response) {
+        function readmeLoadFileCallback(next, error, response) {
             if (error) {
                 next(error, response);
             }
@@ -92,7 +92,7 @@ exports.loadOne = function (task, callback) {
             next(null, item);
         }
 
-        githubAPI.readmeLoadFile(body.download_url, readmeLoadFileCallback);
+        githubAPI.readmeLoadFile(body.download_url, readmeLoadFileCallback.bind(null, next));
     }
 
 
