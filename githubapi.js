@@ -14,7 +14,11 @@ var requestHandler = function (req, callback) {
             body += chunk;
         });
         response.on('end', function () {
-            callback(null, body);
+            if (response.statusCode !== 200) {
+                callback(new Error(response.statusCode + ' ' + response.statusMessage));
+            } else {
+                callback(null, body);
+            }
         });
     });
     req.on('error', function (error) {
@@ -31,33 +35,26 @@ var createRequest = function (path, method, headers) {
         host: 'api.github.com',
         path: path,
         method: method || 'GET',
-        headers: headers || { }
+        headers: headers
     });
 };
 
 var request = function (path, params, callback) {
-    params = params || { };
     flow.serial([
         function (next) {
             fs.readFile(TOKEN_PATH, 'utf-8', function (err, token) {
-                next(null, err ? '' : token.trim());
+                next(null, err ? '' : '?access_token=' + token.trim());
             });
         },
         function (token, next) {
-            path += '?access_token=' + token;
+            path += token;
             var req = createRequest(path, params.method, params.headers || {});
             if (params.content) {
                 req.write(params.content);
             }
             requestHandler(req, next);
         }
-    ], function (err, data) {
-        if (err) {
-            callback(err);
-        } else {
-            callback(null, data);
-        }
-    });
+    ], callback);
 };
 
 var bodyParse = function (path, callback) {
