@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 'use strict';
 
 var flow = require('flow');
@@ -7,7 +8,7 @@ var githubAPI = require('./githubAPI.js');
  * Сделано задание на звездочку
  * Реализовано получение html
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Получение списка задач
@@ -20,13 +21,9 @@ exports.getList = function (category, callback) {
             callback(err);
         }
 
-        if (data.statusCode !== 200) {
-            callback(data.statusMessage);
-        }
-
         var parsedData;
         try {
-            parsedData = JSON.parse(data.body);
+            parsedData = JSON.parse(data);
         } catch (e) {
             callback(e);
 
@@ -61,13 +58,8 @@ exports.loadOne = function (task, callback) {
             callback(err);
         }
 
-        if (data.statusCode !== 200) {
-            next(data.statusMessage);
-        }
-
-        var body;
         try {
-            body = JSON.parse(data.body);
+            data = JSON.parse(data);
         } catch (e) {
             next(e);
 
@@ -75,46 +67,47 @@ exports.loadOne = function (task, callback) {
         }
 
         var item = {
-            name: body.name,
-            description: body.description
+            name: data.name,
+            description: data.description
         };
 
         next(null, item);
     }
 
     function readmeCallback(next, item, err, data) {
-        function readmeLoadFileCallback(nextCallback, error, response) {
+        function readmeLoadFileCallback(next, error, response) {
             if (error) {
-                nextCallback(error);
+                next(error);
             }
 
-            if (response.statusCode !== 200) {
-                nextCallback(response.statusMessage);
+            item.markdown = response.replace(/\n/g, '\r\n');
+            // item.markdown = response;
+
+            function htmlReadmeCallback(next, item, error, response) {
+                if (error) {
+                    next(error);
+                }
+
+                item.html = new Buffer(response, 'utf8').toString();
+                next(null, item);
             }
 
-            // item.markdown = response.body.replace(/\n/g, '\r\n');
-            item.markdown = response.body;
-            nextCallback(null, item);
+            githubAPI.htmlReadmeRequest(item.markdown, htmlReadmeCallback.bind(null, next, item));
         }
 
         if (err) {
             next(err);
         }
 
-        if (data.statusCode !== 200) {
-            next(data.statusMessage);
-        }
-
-        var body;
         try {
-            body = JSON.parse(data.body);
+            data = JSON.parse(data);
         } catch (e) {
             next(e);
 
             return;
         }
 
-        githubAPI.readmeLoadFile(body.download_url, readmeLoadFileCallback.bind(null, next));
+        githubAPI.readmeLoadFile(data.download_url, readmeLoadFileCallback.bind(null, next));
     }
 
 
