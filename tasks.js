@@ -24,10 +24,12 @@ exports.getList = function (category, callback) {
             callback(data.statusMessage);
         }
 
+        var parsedData;
         try {
-            var parsedData = JSON.parse(data.body);
-        } catch(e) {
+            parsedData = JSON.parse(data.body);
+        } catch (e) {
             callback(e);
+
             return;
         }
 
@@ -63,10 +65,12 @@ exports.loadOne = function (task, callback) {
             next(data.statusMessage);
         }
 
+        var body;
         try {
-            var body = JSON.parse(data.body);
-        } catch(e) {
+            body = JSON.parse(data.body);
+        } catch (e) {
             next(e);
+
             return;
         }
 
@@ -101,10 +105,12 @@ exports.loadOne = function (task, callback) {
             next(data.statusMessage);
         }
 
+        var body;
         try {
-            var body = JSON.parse(data.body);
-        } catch(e) {
+            body = JSON.parse(data.body);
+        } catch (e) {
             next(e);
+
             return;
         }
 
