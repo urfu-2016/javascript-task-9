@@ -79,6 +79,14 @@ exports.loadOne = function (task, callback) {
 
 
         function readmeLoadFileCallback(error, response) {
+            if (error) {
+                next(error, response);
+            }
+
+            if (response.statusCode !== 200) {
+                next(response.statusMessage, response);
+            }
+
             // item.markdown = response.body.replace(/\n/g, '\r\n');
             item.markdown = response.body;
             next(null, item);
