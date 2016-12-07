@@ -80,8 +80,8 @@ exports.loadOne = function (task, callback) {
                 next(error);
             }
 
-            item.markdown = response.replace(/\n/g, '\r\n');
-            // item.markdown = response;
+            // item.markdown = response.replace(/\n/g, '\r\n');
+            item.markdown = response;
 
             function htmlReadmeCallback(next, item, error, response) {
                 if (error) {
