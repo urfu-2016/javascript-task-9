@@ -59,7 +59,6 @@ exports.getReadmeHtml = function (text, responseCallback) {
             path: MARKDOWN_HTML_METHOD,
             host: GITHUB_URL,
             method: 'POST',
-            encoding: 'utf8',
             headers: {
                 'user-agent': 'node.js',
                 'Content-Type': 'text/plain'
@@ -71,15 +70,15 @@ exports.getReadmeHtml = function (text, responseCallback) {
 };
 
 function requestCallback(callback, response) {
-    var responseData = '';
+    var responseData = new Buffer('', 'utf8');
 
     response.on('error', callback);
 
     response.on('data', function (chunk) {
-        responseData += chunk;
+        responseData = Buffer.concat([responseData, chunk]);
     });
 
     response.on('end', function () {
-        callback(null, responseData);
+        callback(null, responseData.toString());
     });
 }
