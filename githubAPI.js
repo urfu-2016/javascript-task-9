@@ -8,9 +8,6 @@ var LIST_METHOD = '/orgs/urfu-2016/repos';
 var GET_REPO_METHOD = '/repos/urfu-2016/';
 var README_METHOD = '/readme';
 var MARKDOWN_HTML_METHOD = '/markdown/raw';
-
-var USER_AGENT = 'node.js';
-
 var TOKEN_FILE_PATH = './token.txt';
 var TOKEN;
 
@@ -24,7 +21,7 @@ var REQUEST_DATA = {
     host: GITHUB_URL,
     method: 'GET',
     headers: {
-        'user-agent': USER_AGENT,
+        'user-agent': 'node.js',
         Authorization: 'token ' + TOKEN
     }
 };
@@ -62,10 +59,10 @@ exports.getReadmeHtml = function (text, responseCallback) {
             path: MARKDOWN_HTML_METHOD,
             host: GITHUB_URL,
             method: 'POST',
+            encoding: 'utf8',
             headers: {
-                'user-agent': USER_AGENT,
-                'Content-Type': 'text/plain',
-                Authorization: 'token ' + TOKEN
+                'user-agent': 'node.js',
+                'Content-Type': 'text/plain'
             }
         }, requestCallback.bind(null, responseCallback));
 
@@ -74,19 +71,15 @@ exports.getReadmeHtml = function (text, responseCallback) {
 };
 
 function requestCallback(callback, response) {
-    var responseData = new Buffer('', 'utf8');
-    // var responseData = '';
+    var responseData = '';
 
     response.on('error', callback);
 
     response.on('data', function (chunk) {
-        responseData = Buffer.concat([responseData, chunk]);
-        // responseData += chunk;
+        responseData += chunk;
     });
 
     response.on('end', function () {
-        callback(null, responseData.toString('utf8'));
-        // callback(null, responseData);
+        callback(null, responseData);
     });
-
 }

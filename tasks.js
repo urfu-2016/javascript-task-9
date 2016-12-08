@@ -8,7 +8,7 @@ var githubAPI = require('./githubAPI.js');
  * Сделано задание на звездочку
  * Реализовано получение html
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Получение списка задач
@@ -19,28 +19,30 @@ exports.getList = function (category, callback) {
     function responseCallback(err, data) {
         if (err) {
             callback(err);
-        } else {
-            try {
-                data = JSON.parse(data);
-            } catch (e) {
-                callback(e);
 
-                return;
-            }
-
-            var items = data
-                .filter(function (item) {
-                    return item.name.indexOf(category + '-task') === 0;
-                })
-                .map(function (item) {
-                    return {
-                        name: item.name,
-                        description: item.description
-                    };
-                });
-
-            callback(null, items);
+            return;
         }
+
+        try {
+            data = JSON.parse(data);
+        } catch (e) {
+            callback(e);
+
+            return;
+        }
+
+        var items = data
+            .filter(function (item) {
+                return item.name.indexOf(category + '-task') === 0;
+            })
+            .map(function (item) {
+                return {
+                    name: item.name,
+                    description: item.description
+                };
+            });
+
+        callback(null, items);
     }
 
     githubAPI.getList(responseCallback);
@@ -68,57 +70,63 @@ exports.loadOne = function (task, callback) {
 function repositoryCallback(next, callback, err, data) {
     if (err) {
         callback(err);
-    } else {
-        try {
-            data = JSON.parse(data);
-        } catch (e) {
-            callback(err);
 
-            return;
-        }
-
-        next(err, {
-            name: data.name,
-            description: data.description
-        });
+        return;
     }
+
+    try {
+        data = JSON.parse(data);
+    } catch (e) {
+        next(e);
+
+        return;
+    }
+
+    var item = {
+        name: data.name,
+        description: data.description
+    };
+
+    next(null, item);
 }
 
 function readmeCallback(next, item, err, response) {
     if (err) {
         next(err);
-    } else {
-        try {
-            response = JSON.parse(response);
-        } catch (e) {
-            next(e);
+
+        return;
+    }
+
+    try {
+        response = JSON.parse(response);
+    } catch (e) {
+        next(e);
+
+        return;
+    }
+
+    function readmeLoadFileCallback(next, err, response) {
+        if (err) {
+            next(err);
 
             return;
         }
 
-        githubAPI.getReadmeFile(
-            response.download_url,
-            readmeLoadFileCallback.bind(null, next, item)
-        );
-    }
-}
-
-function readmeLoadFileCallback(next, item, err, response) {
-    if (err) {
-        next(err);
-    } else {
         // item.markdown = response.replace(/\n/g, '\r\n');
-
         item.markdown = response;
         githubAPI.getReadmeHtml(item.markdown, htmlReadmeCallback.bind(null, next, item));
     }
+
+    githubAPI.getReadmeFile(response.download_url, readmeLoadFileCallback.bind(null, next));
 }
 
 function htmlReadmeCallback(next, item, err, response) {
     if (err) {
         next(err);
-    } else {
-        item.html = response;
-        next(null, item);
+
+        return;
     }
+
+    item.html = response;
+    next(null, item);
 }
