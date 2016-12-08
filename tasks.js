@@ -14,6 +14,7 @@ var POST = 'POST';
 var README = '/readme';
 var MARKDOWN = '/markdown/raw';
 
+
 /**
  * Получение списка задач
  * @param {String} category – категория задач (javascript или markup)
@@ -23,13 +24,6 @@ exports.getList = function (category, callback) {
     var cb = function (err, res) {
         if (err) {
             callback(err, null);
-
-            return;
-        }
-        try {
-            res = JSON.parse(res);
-        } catch (e) {
-            callback(e, null);
 
             return;
         }
@@ -50,45 +44,30 @@ exports.getList = function (category, callback) {
  * @param {String} task – идентификатор задачи
  * @param {Function} callback
  */
-
-var cb = function (next, data, err, res) {
-    if (err) {
-        next(err, null);
-
-        return;
-    }
-    try {
-        res = JSON.parse(res);
-    } catch (e) {
-        next(e, null);
-
-        return;
-    }
-    if (res.name === 'README.md') {
-        data.markdown = new Buffer(res.content, 'base64').toString();
-        next(null, data);
-
-        return;
-    }
-    data.name = res.name;
-    data.description = res.description;
-    next(null, data);
-
-    return;
-};
-
-var cbHTML = function (next, data, err, res) {
-    if (err) {
-        next(err, null);
-
-        return;
-    }
-
-    data.html = res;
-    next(null, data);
-};
-
 exports.loadOne = function (task, callback) {
+    var cb = function (next, data, err, res) {
+        if (err) {
+            next(err, null);
+
+            return;
+        }
+        if (res.name === 'README.md') {
+            data.markdown = new Buffer(res.content, 'base64').toString();
+            next(null, data);
+
+            return;
+        }
+        if (res.name === task) {
+            data.name = res.name;
+            data.description = res.description;
+            next(null, data);
+
+            return;
+        }
+        data.html = res;
+        next(null, data);
+    };
+
     var pathRepo = REPO + task;
     var pathReadme = pathRepo + README;
     flow.serial([
@@ -99,7 +78,7 @@ exports.loadOne = function (task, callback) {
             gitApi.getRequest(pathReadme, GET, null, cb.bind(null, next, data));
         },
         function (data, next) {
-            gitApi.getRequest(MARKDOWN, POST, data.markdown, cbHTML.bind(null, next, data));
+            gitApi.getRequest(MARKDOWN, POST, data.markdown, cb.bind(null, next, data));
         }
     ], callback);
 };

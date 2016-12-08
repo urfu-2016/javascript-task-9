@@ -30,10 +30,10 @@ exports.getOptions = function (path, method) {
 exports.getRequest = function (path, method, data, callback) {
     var options = exports.getOptions(path, method);
     var request = https.request(options);
+    var parse = true;
     if (data !== null) {
-        console.info('data');
-        console.info(data);
-        request.write(String(data));
+        request.write(data);
+        parse = false;
     }
     request.on('response', function (response) {
         var resultData = '';
@@ -45,12 +45,13 @@ exports.getRequest = function (path, method, data, callback) {
             error = err;
         });
         response.on('end', function () {
-            // var result = '';
-            // try {
-            //     result = JSON.parse(resultData);
-            // } catch (e) {
-            //     callback(e);
-            // }
+            try {
+                if (parse) {
+                    resultData = JSON.parse(resultData);
+                }
+            } catch (e) {
+                callback(e, null);
+            }
             callback(error, resultData);
         });
     });
