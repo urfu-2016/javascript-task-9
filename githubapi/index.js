@@ -1,8 +1,8 @@
 'use strict';
 
-var flow = require('flow');
 var fs = require('fs');
 var path = require('path');
+var flow = require('flow');
 var request = require('./request');
 
 
@@ -13,12 +13,6 @@ if (fs.existsSync(TOKEN_PATH)) {
     AUTHORIZATION = 'token ' + fs.readFileSync(TOKEN_PATH, 'utf-8').trim();
 }
 
-var urlPathJoin = function () {
-    return [].reduce.call(arguments, function (urlPath, item) {
-        return urlPath + '/' + item;
-    }, '');
-};
-
 var requestOptions = function (urlPath, method, headers) {
     headers = headers || {};
     headers['User-Agent'] = 'GitHubAPI/1.1';
@@ -26,22 +20,22 @@ var requestOptions = function (urlPath, method, headers) {
         headers.authorization = AUTHORIZATION;
     }
 
-    return request.create('https://api.github.com' + urlPath, method, headers);
+    return request.create('https://api.github.com/' + urlPath, method, headers);
 };
 
 exports.getRepos = function (type, login, callback) {
-    request.json(requestOptions(urlPathJoin(type, login, 'repos')), null, callback);
+    request.json(requestOptions([type, login, 'repos'].join('/')), null, callback);
 };
 
 exports.getRepo = function (login, repo, callback) {
-    request.json(requestOptions(urlPathJoin('repos', login, repo)), null, callback);
+    request.json(requestOptions(['repos', login, repo].join('/')), null, callback);
 };
 
 exports.getReadme = function (login, repo, callback) {
     flow.serial([
         function (next) {
-            var params = requestOptions(urlPathJoin('repos', login, repo, 'readme'));
-            request.json(params, null, function (err, data) {
+            var options = requestOptions(['repos', login, repo, 'readme'].join('/'));
+            request.json(options, null, function (err, data) {
                 if (err) {
                     next(err);
                 } else {
@@ -51,7 +45,7 @@ exports.getReadme = function (login, repo, callback) {
             });
         },
         function (readme, next) {
-            var params = requestOptions('/markdown/raw', 'POST', {
+            var params = requestOptions('markdown/raw', 'POST', {
                 'Content-Type': 'text/x-markdown'
             });
             request(params, readme.markdown, function (err, data) {
