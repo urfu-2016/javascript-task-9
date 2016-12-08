@@ -8,6 +8,9 @@ var LIST_METHOD = '/orgs/urfu-2016/repos';
 var GET_REPO_METHOD = '/repos/urfu-2016/';
 var README_METHOD = '/readme';
 var MARKDOWN_HTML_METHOD = '/markdown/raw';
+
+var USER_AGENT = 'node.js';
+
 var TOKEN_FILE_PATH = './token.txt';
 var TOKEN;
 
@@ -21,7 +24,7 @@ var REQUEST_DATA = {
     host: GITHUB_URL,
     method: 'GET',
     headers: {
-        'user-agent': 'node.js',
+        'user-agent': USER_AGENT,
         Authorization: 'token ' + TOKEN
     }
 };
@@ -60,8 +63,9 @@ exports.getReadmeHtml = function (text, responseCallback) {
             host: GITHUB_URL,
             method: 'POST',
             headers: {
-                'user-agent': 'node.js',
-                'Content-Type': 'text/plain'
+                'user-agent': USER_AGENT,
+                'Content-Type': 'text/plain',
+                Authorization: 'token ' + TOKEN
             }
         }, requestCallback.bind(null, responseCallback));
 

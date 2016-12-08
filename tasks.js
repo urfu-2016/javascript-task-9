@@ -77,12 +77,10 @@ function repositoryCallback(next, callback, err, data) {
             return;
         }
 
-        var item = {
+        next(err, {
             name: data.name,
             description: data.description
-        };
-
-        next(err, item);
+        });
     }
 }
 
@@ -92,13 +90,16 @@ function readmeCallback(next, item, err, response) {
     } else {
         try {
             response = JSON.parse(response);
-            githubAPI.getReadmeFile(
-                response.download_url,
-                readmeLoadFileCallback.bind(null, next, item)
-            );
         } catch (e) {
             next(e);
+
+            return;
         }
+
+        githubAPI.getReadmeFile(
+            response.download_url,
+            readmeLoadFileCallback.bind(null, next, item)
+        );
     }
 }
 
