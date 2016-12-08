@@ -19,6 +19,8 @@ exports.getList = function (category, callback) {
     githubApi.getRepos(ORG, function (err, repos) {
         if (err) {
             callback(err);
+
+            return;
         }
         var tasks = repos.map(function (repo) {
             return {
