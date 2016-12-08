@@ -24,16 +24,21 @@ var requestHandler = function (req, callback) {
     req.end();
 };
 
-var request = function (url, options, callback) {
+var requestParams = function (url, options) {
     var params = urllib.parse(url);
+    params.method = options.method || 'GET';
+    params.headers = options.headers || { };
+    params.headers['User-Agent'] = params.headers['User-Agent'] || 'RequestModule/1.0';
+
+    return params;
+};
+
+var request = function (url, options, callback) {
     if (typeof options === 'function') {
         callback = options;
         options = {};
     }
-    params.method = options.method || 'GET';
-    params.headers = options.headers || { };
-    params.headers['User-Agent'] = params.headers['User-Agent'] || 'RequestModule/1.0';
-    var req = https.request(params);
+    var req = https.request(requestParams(url, options));
     if (options.body) {
         req.write(options.body);
     }
