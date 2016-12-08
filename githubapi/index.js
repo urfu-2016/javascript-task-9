@@ -13,9 +13,11 @@ if (fs.existsSync(TOKEN_PATH)) {
     AUTHORIZATION = 'token ' + fs.readFileSync(TOKEN_PATH, 'utf-8').trim();
 }
 
-var requestOptions = function (urlPath, method, headers) {
-    headers = headers || {};
-    headers['User-Agent'] = 'GitHubAPI/1.1';
+var requestOptions = function (urlPath, method, contentType) {
+    var headers = {
+        'User-Agent': 'GitHubAPI/1.1',
+        'Content-Type': contentType || 'application/json'
+    };
     if (AUTHORIZATION) {
         headers.authorization = AUTHORIZATION;
     }
@@ -45,9 +47,7 @@ exports.getReadme = function (login, repo, callback) {
             });
         },
         function (readme, next) {
-            var params = requestOptions('markdown/raw', 'POST', {
-                'Content-Type': 'text/x-markdown'
-            });
+            var params = requestOptions('markdown/raw', 'POST', 'text/x-markdown');
             request(params, readme.markdown, function (err, data) {
                 if (err) {
                     next(err);
