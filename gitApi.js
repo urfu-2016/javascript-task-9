@@ -45,14 +45,17 @@ exports.getRequest = function (path, method, data, callback) {
             error = err;
         });
         response.on('end', function () {
+            var result = resultData;
             try {
                 if (parse) {
-                    resultData = JSON.parse(resultData);
+                    result = JSON.parse(resultData);
                 }
             } catch (e) {
-                callback(e, null);
+                callback(e);
+
+                return;
             }
-            callback(error, resultData);
+            callback(error, result);
         });
     });
     request.end();
