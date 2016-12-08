@@ -8,7 +8,7 @@ var githubAPI = require('./githubAPI.js');
  * Сделано задание на звездочку
  * Реализовано получение html
  */
-exports.isStar = true;
+exports.isStar = false;
 
 /**
  * Получение списка задач
