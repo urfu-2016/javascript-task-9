@@ -85,12 +85,7 @@ exports.getMarkdown = function (owner, repo, callback) {
         var parsed = '';
         try {
             parsed = JSON.parse(data);
-            var content = '';
-            try {
-                content = new Buffer(parsed.content, 'base64').toString('utf-8');
-            } catch (e) {
-                console.info(e.message);
-            }
+            var content = new Buffer(parsed.content, 'base64').toString('utf-8');
             callback(null, content);
         } catch (e) {
             callback(e);
