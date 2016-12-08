@@ -44,21 +44,25 @@ function getResponseCallback(reject, resolve) {
     };
 }
 
-function jsonParse(data) {
-    var parsed = '';
-    try {
-        parsed = JSON.parse(data);
-    } catch (e) {
-        console.info(e.message);
-    }
-
-    return parsed;
-}
+// function jsonParse(data) {
+//     var parsed = '';
+//     try {
+//         parsed = JSON.parse(data);
+//     } catch (e) {
+//         console.info(e.message);
+//     }
+//
+//     return parsed;
+// }
 
 exports.getRepos = function (org, callback) {
     var orgPath = '/orgs/' + org + '/repos';
     function resolve(data) {
-        callback(null, jsonParse(data));
+        try {
+            callback(null, JSON.parse(data));
+        } catch (e) {
+            callback(e);
+        }
     }
     https.get(getOptions(orgPath), getResponseCallback(callback, resolve)).end();
 };
@@ -66,7 +70,11 @@ exports.getRepos = function (org, callback) {
 exports.getRepo = function (owner, repo, callback) {
     var orgPath = '/repos/' + owner + '/' + repo;
     function resolve(data) {
-        callback(null, jsonParse(data));
+        try {
+            callback(null, JSON.parse(data));
+        } catch (e) {
+            callback(e);
+        }
     }
     https.get(getOptions(orgPath), getResponseCallback(callback, resolve)).end();
 };
@@ -74,14 +82,19 @@ exports.getRepo = function (owner, repo, callback) {
 exports.getMarkdown = function (owner, repo, callback) {
     var orgPath = '/repos/' + owner + '/' + repo + '/readme';
     function resolve(data) {
-        var parsed = jsonParse(data);
-        var content = '';
+        var parsed = '';
         try {
-            content = new Buffer(parsed.content, 'base64').toString('utf-8');
+            parsed = JSON.parse(data);
+            var content = '';
+            try {
+                content = new Buffer(parsed.content, 'base64').toString('utf-8');
+            } catch (e) {
+                console.info(e.message);
+            }
+            callback(null, content);
         } catch (e) {
-            console.info(e.message);
+            callback(e);
         }
-        callback(null, content);
     }
     https.get(getOptions(orgPath), getResponseCallback(callback, resolve)).end();
 };
