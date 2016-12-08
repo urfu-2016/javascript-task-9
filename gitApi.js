@@ -13,6 +13,7 @@ function getToken() {
     }
 }
 
+
 exports.getOptions = function (path, method) {
     return {
         host: GITHUBAPI,
@@ -44,13 +45,13 @@ exports.getRequest = function (path, method, data, callback) {
             error = err;
         });
         response.on('end', function () {
-            var result = '';
-            try {
-                result = JSON.parse(resultData);
-            } catch (e) {
-                result = resultData;
-            }
-            callback(error, result);
+            // var result = '';
+            // try {
+            //     result = JSON.parse(resultData);
+            // } catch (e) {
+            //     callback(e);
+            // }
+            callback(error, resultData);
         });
     });
     request.end();

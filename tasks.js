@@ -26,6 +26,13 @@ exports.getList = function (category, callback) {
 
             return;
         }
+        try {
+            res = JSON.parse(res);
+        } catch (e) {
+            callback(e, null);
+
+            return;
+        }
         callback(null, res.filter(function (item) {
             return item.name.indexOf(category + '-task-') === 0;
         }).map(function (item) {
@@ -43,30 +50,45 @@ exports.getList = function (category, callback) {
  * @param {String} task – идентификатор задачи
  * @param {Function} callback
  */
-exports.loadOne = function (task, callback) {
-    var cb = function (next, data, err, res) {
-        if (err) {
-            next(err, null);
 
-            return;
-        }
-        if (res.name === 'README.md') {
-            data.markdown = new Buffer(res.content, 'base64').toString();
-            next(null, data);
+var cb = function (next, data, err, res) {
+    if (err) {
+        next(err, null);
 
-            return;
-        }
-        if (res.name === task) {
-            data.name = res.name;
-            data.description = res.description;
-            next(null, data);
+        return;
+    }
+    try {
+        res = JSON.parse(res);
+    } catch (e) {
+        next(e, null);
 
-            return;
-        }
-        data.html = res;
+        return;
+    }
+    if (res.name === 'README.md') {
+        data.markdown = new Buffer(res.content, 'base64').toString();
         next(null, data);
-    };
 
+        return;
+    }
+    data.name = res.name;
+    data.description = res.description;
+    next(null, data);
+
+    return;
+};
+
+var cbHTML = function (next, data, err, res) {
+    if (err) {
+        next(err, null);
+
+        return;
+    }
+
+    data.html = res;
+    next(null, data);
+};
+
+exports.loadOne = function (task, callback) {
     var pathRepo = REPO + task;
     var pathReadme = pathRepo + README;
     flow.serial([
@@ -77,7 +99,7 @@ exports.loadOne = function (task, callback) {
             gitApi.getRequest(pathReadme, GET, null, cb.bind(null, next, data));
         },
         function (data, next) {
-            gitApi.getRequest(MARKDOWN, POST, data.markdown, cb.bind(null, next, data));
+            gitApi.getRequest(MARKDOWN, POST, data.markdown, cbHTML.bind(null, next, data));
         }
     ], callback);
 };
