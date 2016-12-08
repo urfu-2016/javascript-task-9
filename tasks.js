@@ -107,6 +107,7 @@ function readmeLoadFileCallback(next, item, err, response) {
         next(err);
     } else {
         // item.markdown = response.replace(/\n/g, '\r\n');
+
         item.markdown = response;
         githubAPI.getReadmeHtml(item.markdown, htmlReadmeCallback.bind(null, next, item));
     }
