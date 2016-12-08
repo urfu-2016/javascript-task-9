@@ -6,7 +6,6 @@ var fs = require('fs');
 var path = require('path');
 var assert = require('assert');
 var nock = require('nock');
-
 var tasks = require('./tasks');
 
 var reposPayload = require('./payloads/repos');
