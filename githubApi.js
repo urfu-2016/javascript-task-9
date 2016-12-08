@@ -44,17 +44,6 @@ function getResponseCallback(reject, resolve) {
     };
 }
 
-// function jsonParse(data) {
-//     var parsed = '';
-//     try {
-//         parsed = JSON.parse(data);
-//     } catch (e) {
-//         console.info(e.message);
-//     }
-//
-//     return parsed;
-// }
-
 exports.getRepos = function (org, callback) {
     var orgPath = '/orgs/' + org + '/repos';
     function resolve(data) {
