@@ -72,17 +72,14 @@ exports.getReadmeHtml = function (text, responseCallback) {
 
 function requestCallback(callback, response) {
     var responseData = new Buffer('', 'utf8');
-    // var responseData = '';
 
     response.on('error', callback);
 
     response.on('data', function (chunk) {
         responseData = Buffer.concat([responseData, chunk]);
-        // responseData += chunk;
     });
 
     response.on('end', function () {
         callback(null, responseData.toString('utf8'));
-        // callback(null, responseData);
     });
 }
