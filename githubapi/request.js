@@ -1,8 +1,8 @@
 'use strict';
 
 var https = require('https');
+var urllib = require('url');
 var flow = require('flow');
-
 
 var requestHandler = function (req, callback) {
     req.on('response', function (response) {
@@ -33,6 +33,14 @@ var request = function (options, content, callback) {
 };
 
 module.exports = request;
+
+module.exports.create = function (url, method, headers) {
+    var options = urllib.parse(url);
+    options.method = method || 'GET';
+    options.headers = headers || { 'User-Agent': 'RequestModule/1.0' };
+
+    return options;
+};
 
 module.exports.json = function (options, content, callback) {
     flow.serial([
