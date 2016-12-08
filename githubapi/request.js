@@ -24,28 +24,28 @@ var requestHandler = function (req, callback) {
     req.end();
 };
 
-var request = function (options, content, callback) {
-    var req = https.request(options);
-    if (content) {
-        req.write(content);
+var request = function (url, options, callback) {
+    var params = urllib.parse(url);
+    if (typeof options === 'function') {
+        callback = options;
+        options = {};
+    }
+    params.method = options.method || 'GET';
+    params.headers = options.headers || { };
+    params.headers['User-Agent'] = params.headers['User-Agent'] || 'RequestModule/1.0';
+    var req = https.request(params);
+    if (options.body) {
+        req.write(options.body);
     }
     requestHandler(req, callback);
 };
 
 module.exports = request;
 
-module.exports.create = function (url, method, headers) {
-    var options = urllib.parse(url);
-    options.method = method || 'GET';
-    options.headers = headers || { 'User-Agent': 'RequestModule/1.0' };
-
-    return options;
-};
-
-module.exports.json = function (options, content, callback) {
+module.exports.json = function (url, options, callback) {
     flow.serial([
         function (next) {
-            request(options, content, next);
+            request(url, options, next);
         },
         flow.makeAsync(JSON.parse)
     ], callback);
