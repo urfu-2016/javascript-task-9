@@ -46,15 +46,13 @@ exports.loadOne = function (task, callback) {
         },
         function (data1, next) {
             githubApi.getReadMe(task, 'urfu-2016', function (err, data) {
-                result.markdown = new Buffer(data.content, 'base64').toString('utf-8');
+                try {
+                    result.markdown = new Buffer(data.content, 'base64').toString('utf-8');
+                } catch (e) {
+                    result.markdown = '';
+                }
                 next(err, result);
             });
         }
-    ], function (err) {
-        if (err) {
-            callback(err);
-        } else {
-            callback(null, result);
-        }
-    });
+    ], callback);
 };
