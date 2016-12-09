@@ -18,7 +18,9 @@ exports.isStar = false;
 exports.getList = function (category, callback) {
     var result = [];
     githubApi.getRepos('urfu-2016', function (err, data) {
-
+        if (err) {
+            callback(err, null);
+        }
         var arr = data.filter(function (task) {
             return task.name.indexOf(category + '-task') + 1;
         });
@@ -44,7 +46,7 @@ exports.loadOne = function (task, callback) {
                 next(err, result);
             });
         },
-        function (data1, next) {
+        function (results, next) {
             githubApi.getReadMe(task, 'urfu-2016', function (err, data) {
                 try {
                     result.markdown = new Buffer(data.content, 'base64').toString('utf-8');

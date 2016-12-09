@@ -10,9 +10,9 @@ try {
     TOKEN = '';
 }
 
-function sendRequest(method, options, callback) {
+function sendRequest(options, callback) {
     options.host = API_HOST;
-    options.method = method;
+    options.method = 'GET';
     if (TOKEN) {
         options.headers = {
             'authorization': TOKEN,
@@ -26,10 +26,14 @@ function sendRequest(method, options, callback) {
             body += chunk;
         });
         response.on('end', function () {
-            try {
-                callback(null, JSON.parse(body));
-            } catch (e) {
-                callback(e);
+            if (response.statusCode === 200) {
+                try {
+                    callback(null, JSON.parse(body));
+                } catch (e) {
+                    callback(e);
+                }
+            } else {
+                callback(new Error(response.statusCode + response.statusMessage));
             }
         });
     });
@@ -39,17 +43,17 @@ function sendRequest(method, options, callback) {
 
 exports.getRepos = function (org, callback) {
     var url = '/orgs/' + org + '/repos';
-    sendRequest('GET', { path: url }, callback);
+    sendRequest({ path: url }, callback);
 };
 
 exports.getRepoInfo = function (task, org, callback) {
     var url = '/repos/' + org + '/' + task;
-    sendRequest('GET', { path: url }, callback);
+    sendRequest({ path: url }, callback);
 };
 
 exports.getReadMe = function (task, org, callback) {
     var url = '/repos/' + org + '/' + task + '/readme';
-    sendRequest('GET', { path: url }, callback);
+    sendRequest({ path: url }, callback);
 };
 
 
