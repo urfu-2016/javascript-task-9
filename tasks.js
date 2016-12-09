@@ -60,7 +60,6 @@ exports.loadOne = function (task, callback) {
             try {
                 repo = JSON.parse(body);
                 taskInfo.markdown = new Buffer(repo.content, repo.encoding).toString();
-                taskInfo.markdown = '';
                 callback(null, taskInfo);
             } catch (e) {
                 callback(e, null);
