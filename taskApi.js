@@ -28,7 +28,11 @@ function sendRequest(method, options, callback) {
         });
         response.on('end', function () {
             if (body) {
-                callback(null, JSON.parse(body));
+                try {
+                    callback(null, JSON.parse(body));
+                } catch (e) {
+                    callback(e);
+                }
             } else {
                 callback(new Error(response.statusCode + response.statusMessage));
             }
