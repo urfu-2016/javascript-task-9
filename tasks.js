@@ -41,9 +41,6 @@ exports.loadOne = function (task, callback) {
     flow.serial([
         function (next) {
             githubApi.getRepoInfo(task, 'urfu-2016', function (err, data) {
-                if (err) {
-                    callback(err, null);
-                }
                 result.name = data.name;
                 result.description = data.description;
                 next(err, result);
