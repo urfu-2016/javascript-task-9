@@ -6,7 +6,7 @@ var api = require('./gitAPI');
  * Сделано задание на звездочку
  * Реализовано получение html
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Получение списка задач
@@ -54,13 +54,28 @@ exports.getList = function (category, callback) {
  */
 exports.loadOne = function (task, callback) {
     var taskInfo = {};
+    var htmlCallback = function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            try {
+                taskInfo.html = body;
+                callback(null, taskInfo);
+            } catch (e) {
+                callback(e, null);
+            }
+        } else if (error) {
+            callback(error, null);
+        } else {
+            callback(new Error(response.statusCode));
+        }
+    };
+
     var markdownCallback = function (error, response, body) {
         if (!error && response.statusCode === 200) {
             var repo;
             try {
                 repo = JSON.parse(body);
                 taskInfo.markdown = new Buffer(repo.content, repo.encoding).toString();
-                callback(null, taskInfo);
+                api.getHTML(taskInfo.markdown, htmlCallback);
             } catch (e) {
                 callback(e, null);
             }
@@ -76,7 +91,6 @@ exports.loadOne = function (task, callback) {
             var repo;
             try {
                 repo = JSON.parse(body);
-
                 taskInfo.name = repo.name;
                 taskInfo.description = repo.description;
                 api.getReadme(task, markdownCallback);

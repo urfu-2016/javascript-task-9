@@ -43,11 +43,26 @@ var GET_README = {
     }
 };
 
-var request = function (query, cb) {
+var GET_HTML = {
+    method: 'POST',
+    protocol: 'https:',
+    host: githubAPI,
+    path: '/markdown/raw',
+    headers: {
+        'User-Agent': 'request',
+        'Content-Type': 'text/x-markdown'
+    }
+};
+
+var request = function (query, cb, markdown) {
     var req = https.request(query);
     var body = '';
     var error = null;
+    if (markdown) {
+        req.write(markdown);
+    }
     req.on('error', function (err) {
+        error = err;
         cb(err);
     });
     req.end();
@@ -57,7 +72,9 @@ var request = function (query, cb) {
         });
 
         response.on('end', function () {
-            cb(error, response, body);
+            if (error === null) {
+                cb(error, response, body);
+            }
         });
     });
     req.end();
@@ -79,4 +96,8 @@ exports.getReadme = function (task, callback) {
     GET_README.path = GET_README.path + task + '/readme' + token;
     request(GET_README, callback);
     GET_README.path = url;
+};
+
+exports.getHTML = function (markdown, callback) {
+    request(GET_HTML, callback, markdown);
 };
