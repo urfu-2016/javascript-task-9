@@ -14,6 +14,10 @@ exports.isStar = false;
  * @param {Function} callback
  */
 exports.getList = function (category, callback) {
+    if ((category !== 'javascript') && (category !== 'markup') && (category !== 'demo')) {
+        throw new Error('wrong category');
+    }
+
     var cb = function (error, response, body) {
         if (!error && response.statusCode === 200) {
             var items = JSON.parse(body);
