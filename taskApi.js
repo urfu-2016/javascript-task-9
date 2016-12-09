@@ -27,14 +27,10 @@ function sendRequest(method, options, callback) {
             body += chunk;
         });
         response.on('end', function () {
-            if (body) {
-                try {
-                    callback(null, JSON.parse(body));
-                } catch (e) {
-                    callback(e);
-                }
-            } else {
-                callback(null, body);
+            try {
+                callback(null, JSON.parse(body));
+            } catch (e) {
+                callback(e);
             }
         });
     });
