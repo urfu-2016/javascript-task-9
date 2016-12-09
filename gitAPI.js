@@ -48,7 +48,7 @@ var request = function (query, cb) {
     var body = '';
     var error = null;
     req.on('error', function (err) {
-        error = err;
+        cb(err);
     });
     req.end();
     req.on('response', function (response) {
@@ -80,4 +80,3 @@ exports.getReadme = function (task, callback) {
     request(GET_README, callback);
     GET_README.path = url;
 };
-
