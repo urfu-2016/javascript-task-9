@@ -34,7 +34,7 @@ function sendRequest(method, options, callback) {
                     callback(e);
                 }
             } else {
-                callback(null, body));
+                callback(null, body);
             }
         });
     });
