@@ -1,6 +1,6 @@
 'use strict';
 
-var request = require('request');
+var https = require('https');
 var fs = require('fs');
 
 var token = '';
@@ -11,27 +11,56 @@ try {
     console.info('no such file "token.txt"');
 }
 
-var githubAPI = 'https://api.github.com';
+var githubAPI = 'api.github.com';
 
 var GET_ALL_REPOSITORY = {
-    url: githubAPI + '/orgs/urfu-2016/repos' + token,
+    method: 'GET',
+    protocol: 'https:',
+    host: githubAPI,
+    path: '/orgs/urfu-2016/repos' + token,
     headers: {
         'User-Agent': 'request'
     }
 };
 
 var GET_TASK_INFO = {
-    url: githubAPI + '/repos/urfu-2016/',
+    method: 'GET',
+    protocol: 'https:',
+    host: githubAPI,
+    path: '/repos/urfu-2016/',
     headers: {
         'User-Agent': 'request'
     }
 };
 
 var GET_README = {
-    url: githubAPI + '/repos/urfu-2016/',
+    method: 'GET',
+    protocol: 'https:',
+    host: githubAPI,
+    path: '/repos/urfu-2016/',
     headers: {
         'User-Agent': 'request'
     }
+};
+
+var request = function (query, cb) {
+    var req = https.request(query);
+    var body = '';
+    var error = null;
+    req.on('error', function (err) {
+        error = err;
+    });
+    req.end();
+    req.on('response', function (response) {
+        response.on('data', function (chunk) {
+            body += chunk; // res.write(chunk);
+        });
+
+        response.on('end', function () {
+            cb(error, response, body);
+        });
+    });
+    req.end();
 };
 
 exports.getAllRepository = function (callback) {
@@ -39,16 +68,16 @@ exports.getAllRepository = function (callback) {
 };
 
 exports.getTaskInfo = function (task, callback) {
-    var url = GET_TASK_INFO.url;
-    GET_TASK_INFO.url = GET_TASK_INFO.url + task + token;
+    var url = GET_TASK_INFO.path;
+    GET_TASK_INFO.path = GET_TASK_INFO.path + task + token;
     request(GET_TASK_INFO, callback);
-    GET_TASK_INFO.url = url;
+    GET_TASK_INFO.path = url;
 };
 
 exports.getReadme = function (task, callback) {
-    var url = GET_README.url;
-    GET_README.url = GET_README.url + task + '/readme' + token;
+    var url = GET_README.path;
+    GET_README.path = GET_README.path + task + '/readme' + token;
     request(GET_README, callback);
-    GET_README.url = url;
+    GET_README.path = url;
 };
 
