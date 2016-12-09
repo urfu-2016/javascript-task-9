@@ -62,7 +62,11 @@ exports.loadOne = function (task, callback) {
 
                 return;
             }
-            taskInfo.markdown = new Buffer(repo.content, repo.encoding).toString();
+            try {
+                taskInfo.markdown = new Buffer(repo.content, repo.encoding).toString();
+            } catch (e) {
+                taskInfo.markdown = '';
+            }
             callback(null, taskInfo);
         } else {
             callback(error, null);
