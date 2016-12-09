@@ -20,7 +20,14 @@ exports.getList = function (category, callback) {
 
     var cb = function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            var items = JSON.parse(body);
+            var items;
+            try {
+                items = JSON.parse(body);
+            } catch (e) {
+                callback(e, null);
+
+                return;
+            }
             items = items.filter(function (item) {
                 return item.name.indexOf(category + '-task') !== -1;
             }).map(function (task) {
@@ -47,7 +54,14 @@ exports.loadOne = function (task, callback) {
     var taskInfo = {};
     var markdownCallback = function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            var repo = JSON.parse(body);
+            var repo;
+            try {
+                repo = JSON.parse(body);
+            } catch (e) {
+                callback(e, null);
+
+                return;
+            }
             taskInfo.markdown = new Buffer(repo.content, repo.encoding).toString();
             callback(null, taskInfo);
         } else {
@@ -57,7 +71,14 @@ exports.loadOne = function (task, callback) {
 
     var repositoryCallback = function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            var repo = JSON.parse(body);
+            var repo;
+            try {
+                repo = JSON.parse(body);
+            } catch (e) {
+                callback(e, null);
+
+                return;
+            }
             taskInfo.name = repo.name;
             taskInfo.description = repo.description;
             api.getReadme(task, markdownCallback);
