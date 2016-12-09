@@ -37,12 +37,10 @@ exports.getList = function (category, callback) {
             } catch (e) {
                 callback(e);
             }
+        } else if (error) {
+            callback(error, null);
         } else {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(new Error(response.statusCode));
-            }
+            callback(new Error(response.statusCode));
         }
     };
 
@@ -61,22 +59,16 @@ exports.loadOne = function (task, callback) {
             var repo;
             try {
                 repo = JSON.parse(body);
-
-                try {
-                    taskInfo.markdown = new Buffer(repo.content, repo.encoding).toString();
-                } catch (e) {
-                    taskInfo.markdown = '';
-                }
+                taskInfo.markdown = new Buffer(repo.content, repo.encoding).toString();
+                taskInfo.markdown = '';
                 callback(null, taskInfo);
             } catch (e) {
                 callback(e, null);
             }
+        } else if (error) {
+            callback(error, null);
         } else {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(new Error(response.statusCode));
-            }
+            callback(new Error(response.statusCode));
         }
     };
 
@@ -89,16 +81,13 @@ exports.loadOne = function (task, callback) {
                 taskInfo.name = repo.name;
                 taskInfo.description = repo.description;
                 api.getReadme(task, markdownCallback);
-            }
-            catch (e) {
+            } catch (e) {
                 callback(e);
             }
+        } else if (error) {
+            callback(error, null);
         } else {
-            if (error) {
-                callback(error, null);
-            } else {
-                callback(new Error(response.statusCode));
-            }
+            callback(new Error(response.statusCode));
         }
     };
 
