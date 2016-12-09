@@ -9,6 +9,8 @@ try {
 } catch (e) {
     console.info('no file');
 }
+var PROTOCOL = 'https:';
+var API_HOST = 'api.github.com';
 
 function handleError(req, callback) {
     req.on('error', function (err) {
@@ -16,7 +18,7 @@ function handleError(req, callback) {
     });
 }
 
-function httpplain(callback, res) {
+function httpPlain(callback, res) {
     var body = '';
     res.on('data', function (chunk) {
         body += chunk;
@@ -27,7 +29,7 @@ function httpplain(callback, res) {
 }
 
 function httpJson(callback, res) {
-    httpplain(function (err, body) {
+    httpPlain(function (err, body) {
         if (err) {
             callback(err, null);
 
@@ -43,8 +45,8 @@ function httpJson(callback, res) {
 
 exports.repoList = function (callback) {
     var options = {
-        protocol: 'https:',
-        host: 'api.github.com',
+        protocol: PROTOCOL,
+        host: API_HOST,
         path: '/orgs/urfu-2016/repos?access_token=' + token,
         method: 'GET',
         headers: { 'User-Agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)' }
@@ -56,8 +58,8 @@ exports.repoList = function (callback) {
 
 exports.repoInfo = function (repo, callback) {
     var options = {
-        protocol: 'https:',
-        host: 'api.github.com',
+        protocol: PROTOCOL,
+        host: API_HOST,
         path: '/repos/urfu-2016/' + repo + '?access_token=' + token,
         method: 'GET',
         headers: { 'User-Agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)' }
@@ -71,8 +73,8 @@ exports.repoInfo = function (repo, callback) {
 exports.markdownToHTML = function (md, callback) {
     var postData = String(md);
     var options = {
-        protocol: 'https:',
-        host: 'api.github.com',
+        protocol: PROTOCOL,
+        host: API_HOST,
         path: '/markdown/raw',
         method: 'POST',
         headers: { 'User-Agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)',
@@ -80,7 +82,7 @@ exports.markdownToHTML = function (md, callback) {
             'Content-Type': 'text/x-markdown'
         }
     };
-    var req = http.request(options, httpplain.bind(null, callback));
+    var req = http.request(options, httpPlain.bind(null, callback));
     handleError(req, callback);
     req.write(postData);
     req.end();

@@ -14,20 +14,19 @@ var MARKUP_TEMPLATE = /markup-task-\d+/;
 var DEMO_TEMPLATE = /demo-task-\d+/;
 
 function getTemplate(category) {
-    if (category === 'javascript') {
+    switch (category) {
+        case 'javascript':
 
-        return JS_TEMPLATE;
+            return JS_TEMPLATE;
+        case 'markup':
+
+            return MARKUP_TEMPLATE;
+        case 'demo':
+
+            return DEMO_TEMPLATE;
+        default:
+            throw new Error('Wrong category');
     }
-    if (category === 'markup') {
-
-        return MARKUP_TEMPLATE;
-    }
-    if (category === 'demo') {
-
-        return DEMO_TEMPLATE;
-    }
-
-    throw new Error('Wrong category');
 }
 
 /**
