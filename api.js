@@ -5,21 +5,50 @@ var fs = require('fs');
 var path_ = require('path');
 
 var API_TOKEN;
-try {
-    API_TOKEN = fs.readFileSync(path_.join(__dirname, 'token.txt'), 'ascii').trim();
-} catch (error) {
-    API_TOKEN = '';
-}
 var API_HOST = 'api.github.com';
 
+function getToken() {
+    try {
+        return fs.readFileSync(path_.join(__dirname, 'token.txt'), 'ascii').trim();
+    } catch (error) {
+        return '';
+    }
+}
 
-function makeRequest(options, headers, isJson, callback) {
-    options = Object.assign({}, options, {
+API_TOKEN = getToken();
+
+function makeRequestJson(method, options, body, callback) {
+    makeRequest(method, options, body, function (error, response) {
+        if (error) {
+            callback(error);
+
+            return;
+        }
+
+        try {
+            callback(null, JSON.parse(response));
+        } catch (err) {
+            callback(err);
+        }
+    });
+}
+
+function makeRequest(method, path, content, callback) {
+    var options = {
+        path: path,
+        method: method,
+        headers: { 'User-Agent': 'node.js' },
         hostname: API_HOST
-    });
-    options.headers = Object.assign({}, headers, {
-        'User-Agent': 'node.js'
-    });
+    };
+
+    if (API_TOKEN) {
+        options.headers.Authorization = 'token ' + API_TOKEN;
+    }
+    if (method === 'POST') {
+        options.headers['Content-Length'] = Buffer.byteLength(content);
+        options.headers['Content-Type'] = 'text/plain';
+    }
+
     var request = https.request(options);
 
     request.on('response', function (response) {
@@ -30,55 +59,39 @@ function makeRequest(options, headers, isJson, callback) {
         });
 
         response.on('end', function () {
-            if (isJson) {
-                try {
-                    callback(null, JSON.parse(body));
-                } catch (error) {
-                    callback(error);
-                }
-            } else {
-                callback(null, body);
-            }
+            callback(null, body);
         });
     });
     request.on('timeout', callback);
     request.on('error', callback);
 
-    return request;
+    if (method === 'POST') {
+        request.write(content);
+    }
+
+    request.end();
 }
 
 exports.getOrganizationRepos = function (organization, callback) {
-    var path = '/orgs/' + organization + '/repos?access_token=' + API_TOKEN;
+    var path = '/orgs/' + organization + '/repos';
 
-    var request = makeRequest({ path: path }, {}, true, callback);
-    request.end();
+    makeRequestJson('GET', path, '', callback);
 };
 
 exports.getRepo = function (owner, repo, callback) {
-    var path = '/repos/' + owner + '/' + repo + '?access_token=' + API_TOKEN;
+    var path = '/repos/' + owner + '/' + repo;
 
-    var request = makeRequest({ path: path }, {}, true, callback);
-    request.end();
+    makeRequestJson('GET', path, '', callback);
 };
 
 exports.getReadme = function (owner, repo, callback) {
-    var path = '/repos/' + owner + '/' + repo + '/readme?access_token=' + API_TOKEN;
+    var path = '/repos/' + owner + '/' + repo + '/readme';
 
-    var request = makeRequest({ path: path }, {}, true, callback);
-    request.end();
+    makeRequestJson('GET', path, '', callback);
 };
 
 exports.renderMarkdown = function (text, callback) {
-    var options = {
-        path: '/markdown/raw?access_token=' + API_TOKEN,
-        method: 'POST'
-    };
-    var headers = {
-        'Content-Length': Buffer.byteLength(text),
-        'Content-Type': 'text/x-markdown'
-    };
-    var request = makeRequest(options, headers, false, callback);
+    var path = '/markdown/raw';
 
-    request.write(text);
-    request.end();
+    makeRequest('POST', path, text, callback);
 };

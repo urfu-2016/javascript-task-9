@@ -11,6 +11,21 @@ exports.isStar = true;
 
 var ALLOWED_CATEGORIES = ['demo', 'javascript', 'markup'];
 
+function filterRepos(category, repos, callback) {
+    var taskNameStart = category + '-task';
+
+    callback(null, repos.reduce(function (filtered, repo) {
+        if (repo.name.startsWith(taskNameStart)) {
+            filtered.push({
+                name: repo.name,
+                description: repo.description
+            });
+        }
+
+        return filtered;
+    }, []));
+}
+
 /**
  * Получение списка задач
  * @param {String} category – категория задач (javascript или markup)
@@ -19,31 +34,12 @@ var ALLOWED_CATEGORIES = ['demo', 'javascript', 'markup'];
 exports.getList = function (category, callback) {
     if (ALLOWED_CATEGORIES.indexOf(category) === -1) {
         callback(new Error('invalid category'));
-
-        return;
+    } else {
+        flow.serial([
+            api.getOrganizationRepos.bind(global, 'urfu-2016'),
+            filterRepos.bind(global, category)
+        ], callback);
     }
-
-    api.getOrganizationRepos('urfu-2016', function (error, repos) {
-        if (error) {
-            callback(error);
-
-            return;
-        }
-
-        var taskNameStart = category + '-task';
-        var result = repos
-            .filter(function (repo) {
-                return repo.name.startsWith(taskNameStart);
-            })
-            .map(function (repo) {
-                return {
-                    name: repo.name,
-                    description: repo.description
-                };
-            });
-
-        callback(null, result);
-    });
 };
 
 /**
@@ -52,46 +48,31 @@ exports.getList = function (category, callback) {
  * @param {Function} callback
  */
 exports.loadOne = function (task, callback) {
+    var result = {};
+
     flow.serial([
+        api.getRepo.bind(global, 'urfu-2016', task),
+
+        function (repo, next) {
+            result.name = repo.name;
+            result.description = repo.description;
+            next(null);
+        },
+
+        api.getReadme.bind(global, 'urfu-2016', task),
+
+        function (readme, next) {
+            result.markdown = new Buffer(readme.content, readme.encoding).toString('utf-8');
+            next(null);
+        },
+
         function (next) {
-            api.getRepo('urfu-2016', task, function (error, repo) {
-                if (error) {
-                    next(error);
-
-                    return;
-                }
-
-                next(null, {
-                    name: repo.name,
-                    description: repo.description
-                });
-            });
+            api.renderMarkdown(result.markdown, next);
         },
 
-        function (data, next) {
-            api.getReadme('urfu-2016', task, function (error, readme) {
-                if (error) {
-                    next(error);
-
-                    return;
-                }
-
-                data.markdown = new Buffer(readme.content, readme.encoding).toString('utf-8');
-                next(null, data);
-            });
-        },
-
-        function (data, next) {
-            api.renderMarkdown(data.markdown, function (error, html) {
-                if (error) {
-                    next(error);
-
-                    return;
-                }
-
-                data.html = html;
-                next(null, data);
-            });
+        function (renderedMarkdown, next) {
+            result.html = renderedMarkdown;
+            next(null, result);
         }
     ], callback);
 };
