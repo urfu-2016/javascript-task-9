@@ -15,7 +15,9 @@ exports.isStar = false;
  */
 exports.getList = function (category, callback) {
     if ((category !== 'javascript') && (category !== 'markup') && (category !== 'demo')) {
-        throw new Error('wrong category');
+        callback(new Error('wrong category'));
+
+        return;
     }
 
     var cb = function (error, response, body) {
@@ -23,22 +25,24 @@ exports.getList = function (category, callback) {
             var items;
             try {
                 items = JSON.parse(body);
+                items = items.filter(function (item) {
+                    return item.name.indexOf(category + '-task') !== -1;
+                }).map(function (task) {
+                    return {
+                        name: task.name,
+                        description: task.description
+                    };
+                });
+                callback(null, items);
             } catch (e) {
-                callback(e, null);
-
-                return;
+                callback(e);
             }
-            items = items.filter(function (item) {
-                return item.name.indexOf(category + '-task') !== -1;
-            }).map(function (task) {
-                return {
-                    name: task.name,
-                    description: task.description
-                };
-            });
-            callback(null, items);
         } else {
-            callback(error, null);
+            if (error) {
+                callback(error, null);
+            } else {
+                callback(new Error(response.statusCode));
+            }
         }
     };
 
@@ -57,19 +61,22 @@ exports.loadOne = function (task, callback) {
             var repo;
             try {
                 repo = JSON.parse(body);
+
+                try {
+                    taskInfo.markdown = new Buffer(repo.content, repo.encoding).toString();
+                } catch (e) {
+                    taskInfo.markdown = '';
+                }
+                callback(null, taskInfo);
             } catch (e) {
                 callback(e, null);
-
-                return;
             }
-            try {
-                taskInfo.markdown = new Buffer(repo.content, repo.encoding).toString();
-            } catch (e) {
-                taskInfo.markdown = '';
-            }
-            callback(null, taskInfo);
         } else {
-            callback(error, null);
+            if (error) {
+                callback(error, null);
+            } else {
+                callback(new Error(response.statusCode));
+            }
         }
     };
 
@@ -78,16 +85,20 @@ exports.loadOne = function (task, callback) {
             var repo;
             try {
                 repo = JSON.parse(body);
-            } catch (e) {
-                callback(e, null);
 
-                return;
+                taskInfo.name = repo.name;
+                taskInfo.description = repo.description;
+                api.getReadme(task, markdownCallback);
             }
-            taskInfo.name = repo.name;
-            taskInfo.description = repo.description;
-            api.getReadme(task, markdownCallback);
+            catch (e) {
+                callback(e);
+            }
         } else {
-            callback(error, null);
+            if (error) {
+                callback(error, null);
+            } else {
+                callback(new Error(response.statusCode));
+            }
         }
     };
 
