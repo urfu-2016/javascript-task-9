@@ -1,18 +1,32 @@
 'use strict';
 
+var githubApi = require('./taskApi');
+var flow = require('flow');
+
 /**
  * Сделано задание на звездочку
  * Реализовано получение html
  */
-exports.isStar = true;
+exports.isStar = false;
 
 /**
  * Получение списка задач
  * @param {String} category – категория задач (javascript или markup)
  * @param {Function} callback
  */
+
 exports.getList = function (category, callback) {
-    console.info(category, callback);
+    var result = [];
+    githubApi.getRepos('urfu-2016', function (err, data) {
+
+        var arr = data.filter(function (task) {
+            return task.name.indexOf(category + '-task') + 1;
+        });
+        arr.forEach(function (item) {
+            result.push({ name: item.name, description: item.description });
+        });
+        callback(err, result);
+    });
 };
 
 /**
@@ -21,5 +35,26 @@ exports.getList = function (category, callback) {
  * @param {Function} callback
  */
 exports.loadOne = function (task, callback) {
-    console.info(task, callback);
+    var result = {};
+    flow.serial([
+        function (next) {
+            githubApi.getRepoInfo(task, 'urfu-2016', function (err, data) {
+                result.name = data.name;
+                result.description = data.description;
+                next(err, result);
+            });
+        },
+        function (data1, next) {
+            githubApi.getReadMe(task, 'urfu-2016', function (err, data) {
+                result.markdown = new Buffer(data.content, 'base64').toString('utf-8');
+                next(err, result);
+            });
+        }
+    ], function (err) {
+        if (err) {
+            callback(err);
+        } else {
+            callback(null, result);
+        }
+    });
 };
