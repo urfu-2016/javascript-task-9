@@ -27,10 +27,14 @@ function sendRequest(method, options, callback) {
             body += chunk;
         });
         response.on('end', function () {
-            try {
-                callback(null, JSON.parse(body));
-            } catch (e) {
-                callback(e);
+            if (response.statusCode === 200) {
+                try {
+                    callback(null, JSON.parse(body));
+                } catch (e) {
+                    callback(e);
+                }
+            } else {
+                callback(new Error(response.statusCode + response.statusMessage));
             }
         });
     });
