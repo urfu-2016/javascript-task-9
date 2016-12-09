@@ -41,6 +41,9 @@ exports.loadOne = function (task, callback) {
     flow.serial([
         function (next) {
             githubApi.getRepoInfo(task, 'urfu-2016', function (err, data) {
+                if (err) {
+                    callback(err, null);
+                }
                 result.name = data.name;
                 result.description = data.description;
                 next(err, result);
@@ -48,6 +51,9 @@ exports.loadOne = function (task, callback) {
         },
         function (results, next) {
             githubApi.getReadMe(task, 'urfu-2016', function (err, data) {
+                if (err) {
+                    callback(err, null);
+                }
                 try {
                     result.markdown = new Buffer(data.content, 'base64').toString('utf-8');
                 } catch (e) {
