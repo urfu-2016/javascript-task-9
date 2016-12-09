@@ -17,7 +17,6 @@ exports.getList = function (category, callback) {
     var cb = function (error, response, body) {
         if (!error && response.statusCode === 200) {
             var items = JSON.parse(body);
-            console.info(items);
             items = items.filter(function (item) {
                 return item.name.indexOf(category + '-task') !== -1;
             }).map(function (task) {
@@ -45,8 +44,7 @@ exports.loadOne = function (task, callback) {
     var markdownCallback = function (error, response, body) {
         if (!error && response.statusCode === 200) {
             var repo = JSON.parse(body);
-            taskInfo.markdown = new Buffer(repo.content, repo.encoding).toString()
-                .replace(/\n/g, '\r\n');
+            taskInfo.markdown = new Buffer(repo.content, repo.encoding).toString();
             callback(null, taskInfo);
         } else {
             callback(error, null);
