@@ -4,7 +4,30 @@
  * Сделано задание на звездочку
  * Реализовано получение html
  */
+
+var github = require('./github');
+var flow = require('flow');
 exports.isStar = true;
+
+var JS_TEMPLATE = /javascript-task-\d+/;
+var MARKUP_TEMPLATE = /markup-task-\d+/;
+var DEMO_TEMPLATE = /demo-task-\d+/;
+
+function getTemplate(category) {
+    switch (category) {
+        case 'javascript':
+
+            return JS_TEMPLATE;
+        case 'markup':
+
+            return MARKUP_TEMPLATE;
+        case 'demo':
+
+            return DEMO_TEMPLATE;
+        default:
+            throw new Error('Wrong category');
+    }
+}
 
 /**
  * Получение списка задач
@@ -12,8 +35,71 @@ exports.isStar = true;
  * @param {Function} callback
  */
 exports.getList = function (category, callback) {
-    console.info(category, callback);
+    var template;
+    try {
+        template = getTemplate(category);
+    } catch (err) {
+        callback(err, null);
+    }
+    github.repoList(function (err, res) {
+        if (!err) {
+            var tasks = [];
+            res.forEach(function (repo) {
+                if (repo.name.match(template)) {
+                    tasks.push({
+                        'name': repo.name,
+                        'description': repo.description
+                    });
+                }
+            });
+            callback(err, tasks);
+        } else {
+            callback(err, null);
+        }
+    });
 };
+
+function addData(func, task, fields, addFields) {
+    if (!addFields) {
+        addFields = fields;
+    }
+
+    return function (data, callback) {
+        func(task, function (err, jsonResponse) {
+            if (err) {
+                callback(err, null);
+
+                return;
+            }
+            for (var i = 0; i < fields.length; i++) {
+                data[addFields[i]] = jsonResponse[fields[i]];
+            }
+            callback(null, data);
+        });
+    };
+}
+
+function contentToMarkdown(data, callback) {
+    try {
+        data.markdown = new Buffer(data.content, data.encoding).toString('utf-8');
+    } catch (err) {
+        callback(err, null);
+    }
+    delete data.content;
+    delete data.encoding;
+    callback(null, data);
+}
+
+
+function addHTMLMarkdown(data, callback) {
+    github.markdownToHTML(data.markdown, function (err, res) {
+        if (err) {
+            callback(err, null);
+        }
+        data.html = res;
+        callback(null, data);
+    });
+}
 
 /**
  * Загрузка одной задачи
@@ -21,5 +107,13 @@ exports.getList = function (category, callback) {
  * @param {Function} callback
  */
 exports.loadOne = function (task, callback) {
-    console.info(task, callback);
+    var repoData = { 'name': task };
+    flow.serial([
+        addData(github.repoInfo, task, ['name', 'description']).bind(null, repoData),
+        addData(github.repoInfo, task + '/readme', ['content', 'encoding']),
+        contentToMarkdown,
+        addHTMLMarkdown
+    ], function (err, data) {
+        callback(err, data);
+    });
 };
