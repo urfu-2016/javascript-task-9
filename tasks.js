@@ -34,7 +34,13 @@ function request(path, call) {
             str += chunk;
         });
         response.on('end', function () {
-            call(undefined, JSON.parse(str));
+            if (response.statusCode === 200) {
+                try {
+                    call(undefined, JSON.parse(str));
+                } catch (err) {
+                    call(err);
+                }
+            }
         });
     };
     https.request(opt, callback).end();
