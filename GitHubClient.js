@@ -4,18 +4,21 @@ var https = require('https');
 var flow = require('flow.gallyam');
 
 var API_URL = 'api.github.com';
+var HTTPS_PORT = 443;
+var DEFAULT_HEADERS = {
+    'Content-Type': 'text/plain;charset=utf-8',
+    'User-Agent': 'Gallyam repo browser'
+}
 
 function createDefaultOptions(token, path, method) {
     return {
         hostname: API_URL,
-        port: 443,
+        port: HTTPS_PORT,
         method: method || 'GET',
         path: path,
-        headers: {
-            'Authorization': 'Basic ' + new Buffer(':' + token).toString('base64'),
-            'Content-Type': 'text/plain;charset=utf-8',
-            'User-Agent': 'Gallyam repo browser'
-        }
+        headers: Object.assign({
+            'Authorization': 'Basic ' + new Buffer(':' + token).toString('base64')
+        }, DEFAULT_HEADERS)
     };
 }
 
