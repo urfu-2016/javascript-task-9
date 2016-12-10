@@ -5,7 +5,7 @@ var flow = require('flow.gallyam');
 
 var API_URL = 'api.github.com';
 
-function createDefaultOptions(token, path, method) {
+function createOptions(token, path, method) {
     return {
         hostname: API_URL,
         port: 443,
@@ -47,17 +47,17 @@ function applyOperationsWithPreprocessing(options, callback, operations) {
 }
 
 GitHubClient.prototype.getRepos = function (callback) {
-    var options = createDefaultOptions(this.token, '/orgs/urfu-2016/repos');
+    var options = createOptions(this.token, '/orgs/urfu-2016/repos');
     applyOperationsWithPreprocessing(options, callback);
 };
 
 GitHubClient.prototype.getRepo = function (repoName, callback) {
-    var options = createDefaultOptions(this.token, '/repos/urfu-2016/' + repoName);
+    var options = createOptions(this.token, '/repos/urfu-2016/' + repoName);
     applyOperationsWithPreprocessing(options, callback);
 };
 
 GitHubClient.prototype.getFileContent = function (repoName, fileName, callback) {
-    var options = createDefaultOptions(this.token, '/repos/urfu-2016/' + repoName + '/' + fileName);
+    var options = createOptions(this.token, '/repos/urfu-2016/' + repoName + '/' + fileName);
     applyOperationsWithPreprocessing(options, callback, [
         flow.makeAsync(function (data) {
             return new Buffer(data.content, 'base64').toString('utf8');
@@ -66,7 +66,7 @@ GitHubClient.prototype.getFileContent = function (repoName, fileName, callback) 
 };
 
 GitHubClient.prototype.renderMarkdown = function (markdown, callback) {
-    var options = createDefaultOptions(this.token, '/markdown/raw', 'POST');
+    var options = createOptions(this.token, '/markdown/raw', 'POST');
     makeRequest(options, callback, markdown);
 };
 
