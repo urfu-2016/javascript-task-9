@@ -1,10 +1,13 @@
 'use strict';
 
+var gitApi = require('./git-api.js');
+var flow = require('flow');
+
 /**
  * Сделано задание на звездочку
  * Реализовано получение html
  */
-exports.isStar = true;
+exports.isStar = false;
 
 /**
  * Получение списка задач
@@ -12,7 +15,21 @@ exports.isStar = true;
  * @param {Function} callback
  */
 exports.getList = function (category, callback) {
-    console.info(category, callback);
+    var result = [];
+    gitApi.getRepositories(function (error, repositories) {
+        result = repositories.filter(function (repository) {
+            return repository.name.match(category + '-task');
+        }).reduce(function (listRepositories, data) {
+            listRepositories.push({
+                name: data.name,
+                description: data.description
+            });
+
+            return listRepositories;
+        }, []);
+
+        callback(null, result);
+    });
 };
 
 /**
@@ -21,5 +38,22 @@ exports.getList = function (category, callback) {
  * @param {Function} callback
  */
 exports.loadOne = function (task, callback) {
-    console.info(task, callback);
+    flow.serial([
+        function (nextCallback) {
+            var path = '/repos/urfu-2016/' + task;
+            gitApi.getRepositoriesInfo(path, function (error, data) {
+                nextCallback(null, {
+                    name: data.name,
+                    description: data.description
+                });
+            });
+        },
+        function (info, nextCallback) {
+            var path = '/repos/urfu-2016/' + task + '/readme';
+            gitApi.getRepositoriesInfo(path, function (error, data) {
+                info.markdown = new Buffer(data.content, 'base64').toString();
+                nextCallback(null, info);
+
+            });
+        }], callback);
 };
