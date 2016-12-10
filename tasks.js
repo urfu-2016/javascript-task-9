@@ -83,15 +83,15 @@ exports.loadOne = function (task, callback) {
 
                 return;
             }
+            if (err1) {
+                callback(err1, undefined);
+
+                return;
+            }
             result.name = data2.name;
             result.description = data2.description;
             callback(undefined, result);
         });
-        if (err1) {
-            callback(err1, undefined);
-
-            return;
-        }
         try {
             result.markdown = new Buffer(data1.content, 'base64').toString('utf-8');
         } catch (err) {
