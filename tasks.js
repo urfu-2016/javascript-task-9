@@ -56,14 +56,16 @@ exports.getList = function (category, callback) {
     var listTasks = [];
     request('/orgs/urfu-2016/repos', function (err, data) {
         if (err) {
-            callback(err, data);
+            callback(err);
+
+            return;
         }
         listTasks = data.filter(function (task) {
             return task.name.indexOf(category + '-task-') >= 0;
         }).map(function (task) {
             return { 'description': task.description, 'name': task.name };
         });
-        callback(err, listTasks);
+        callback(undefined, listTasks);
     });
 };
 
@@ -78,6 +80,8 @@ exports.loadOne = function (task, callback) {
         request('/repos/urfu-2016/' + task, function (err2, data2) {
             if (err2) {
                 callback(err2, undefined);
+
+                return;
             }
             result.name = data2.name;
             result.description = data2.description;
@@ -85,6 +89,8 @@ exports.loadOne = function (task, callback) {
         });
         if (err1) {
             callback(err1, undefined);
+
+            return;
         }
         try {
             result.markdown = new Buffer(data1.content, 'base64').toString('utf-8');
