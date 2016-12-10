@@ -77,15 +77,19 @@ exports.loadOne = function (task, callback) {
     request('/repos/urfu-2016/' + task + '/readme', function (err1, data1) {
         request('/repos/urfu-2016/' + task, function (err2, data2) {
             if (err2) {
-                callback(err2, data2);
+                callback(err2, undefined);
             }
             result.name = data2.name;
             result.description = data2.description;
             callback(undefined, result);
         });
         if (err1) {
-            callback(err1, data1);
+            callback(err1, undefined);
         }
-        result.markdown = new Buffer(data1.content, 'base64').toString('utf-8');
+        try {
+            result.markdown = new Buffer(data1.content, 'base64').toString('utf-8');
+        } catch (err) {
+            result.markdown = '';
+        }
     });
 };
