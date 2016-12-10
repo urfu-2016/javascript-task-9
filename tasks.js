@@ -27,7 +27,7 @@ exports.getList = function (category, callback) {
             };
         })
         .filter(function (task) {
-            return task.name.indexOf(category + '-task') !== -1;
+            return task.name.indexOf(category + '-task') === 0;
         })
         .sort(function (a, b) {
             return a.name.localeCompare(b.name);
@@ -47,14 +47,14 @@ exports.loadOne = function (task, callback) {
             githubApi.getRepo(ORG, task, cb);
         },
         function (data, cb) {
-            githubApi.getMarkdown(ORG, task, function (err, readmeData) {
-                data.markdown = readmeData;
+            githubApi.getMarkdown(ORG, task, function (err, markdown) {
+                data.markdown = markdown;
                 cb(err, data);
             });
         },
         function (data, cb) {
-            githubApi.postHtmlMarkdown(data.markdown, function (err, htmlReadmeData) {
-                data.html = htmlReadmeData;
+            githubApi.renderMarkdown(data.markdown, function (err, html) {
+                data.html = html;
                 cb(err, data);
             });
         }

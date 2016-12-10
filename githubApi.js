@@ -1,21 +1,20 @@
 'use strict';
 
 var fs = require('fs');
-var https = require('https');
 var url = require('url');
+var request = require('./request');
 
-var API_URL = 'api.github.com';
-var USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; WOW64)';
+var API_HOSTNAME = 'api.github.com';
+var USER_AGENT = 'Node.js';
 var TOKEN = '';
 try {
-    TOKEN = fs.readFileSync('token.txt', { encoding: 'utf-8' }).trim();
-    TOKEN = new Buffer(TOKEN).toString('ascii');
+    TOKEN = fs.readFileSync('token.txt', 'ascii').trim();
 } catch (e) {
     console.info(e.message);
 }
 function getOptions(orgPath) {
     return {
-        host: API_URL,
+        host: API_HOSTNAME,
         path: orgPath.path,
         headers:
         {
@@ -25,47 +24,24 @@ function getOptions(orgPath) {
     };
 }
 
-function getResponseCallback(reject, resolve) {
-    return function (response) {
-        var data = '';
-        var hasError = false;
-        response.on('data', function (chunk) {
-            data += chunk;
-        });
-        response.on('error', function (err) {
-            reject(err);
-            hasError = true;
-        });
-        response.on('end', function () {
-            if (!hasError) {
-                resolve(data);
-            }
-        });
+function getGetJSONParse(callback) {
+    return function (data) {
+        try {
+            callback(null, JSON.parse(data));
+        } catch (e) {
+            callback(e);
+        }
     };
 }
 
 exports.getRepos = function (org, callback) {
     var orgPath = url.parse('/orgs/' + org + '/repos');
-    function resolve(data) {
-        try {
-            callback(null, JSON.parse(data));
-        } catch (e) {
-            callback(e);
-        }
-    }
-    https.get(getOptions(orgPath), getResponseCallback(callback, resolve)).end();
+    request.get(getOptions(orgPath), getGetJSONParse(callback), callback);
 };
 
 exports.getRepo = function (owner, repo, callback) {
     var orgPath = url.parse('/repos/' + owner + '/' + repo);
-    function resolve(data) {
-        try {
-            callback(null, JSON.parse(data));
-        } catch (e) {
-            callback(e);
-        }
-    }
-    https.get(getOptions(orgPath), getResponseCallback(callback, resolve)).end();
+    request.get(getOptions(orgPath), getGetJSONParse(callback), callback);
 };
 
 exports.getMarkdown = function (owner, repo, callback) {
@@ -80,17 +56,14 @@ exports.getMarkdown = function (owner, repo, callback) {
             callback(e);
         }
     }
-    https.get(getOptions(orgPath), getResponseCallback(callback, resolve)).end();
+    request.get(getOptions(orgPath), resolve, callback);
 };
 
-exports.postHtmlMarkdown = function (markdown, callback) {
+exports.renderMarkdown = function (markdown, callback) {
     var options = getOptions(url.parse('/markdown/raw'));
     options.headers['Content-Type'] = 'text/plain';
-    options.method = 'POST';
     function contentResolve(data) {
         callback(null, data);
     }
-    var request = https.request(options, getResponseCallback(callback, contentResolve));
-    request.write(markdown);
-    request.end();
+    request.post(options, markdown, contentResolve, callback);
 };
