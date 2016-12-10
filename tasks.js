@@ -53,11 +53,10 @@ exports.getList = function (category, callback) {
             callback(err, data);
         }
         listTasks = data.filter(function (task) {
-            return task.name.indexOf('javascript-task-') >= 0;
+            return task.name.indexOf(category + '-task-') >= 0;
         }).map(function (task) {
             return { 'description': task.description, 'name': task.name };
         });
-        console.info(listTasks);
         callback(err, listTasks);
     });
 };
