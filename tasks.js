@@ -14,7 +14,7 @@ exports.isStar = true;
  * @param {Function} callback
  */
 exports.getList = function (category, callback) {
-    if ((category !== 'javascript') && (category !== 'markup') && (category !== 'demo')) {
+    if (['demo', 'markup', 'javascript'].indexOf(category) === -1) {
         callback(new Error('wrong category'));
 
         return;
@@ -40,7 +40,8 @@ exports.getList = function (category, callback) {
         } else if (error) {
             callback(error, null);
         } else {
-            callback(new Error(response.statusCode));
+            callback(new Error('HTTP response returns :' + response.statusCode +
+                ' ' + response.statusMessage));
         }
     };
 
@@ -65,7 +66,8 @@ exports.loadOne = function (task, callback) {
         } else if (error) {
             callback(error, null);
         } else {
-            callback(new Error(response.statusCode));
+            callback(new Error('HTTP response returns :' + response.statusCode +
+                ' ' + response.statusMessage));
         }
     };
 
@@ -82,7 +84,8 @@ exports.loadOne = function (task, callback) {
         } else if (error) {
             callback(error, null);
         } else {
-            callback(new Error(response.statusCode));
+            callback(new Error('HTTP response returns :' + response.statusCode +
+                ' ' + response.statusMessage));
         }
     };
 
@@ -100,7 +103,8 @@ exports.loadOne = function (task, callback) {
         } else if (error) {
             callback(error, null);
         } else {
-            callback(new Error(response.statusCode));
+            callback(new Error('HTTP response returns :' + response.statusCode +
+                ' ' + response.statusMessage));
         }
     };
 
