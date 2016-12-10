@@ -40,6 +40,8 @@ function request(path, call) {
                 } catch (err) {
                     call(err);
                 }
+            } else {
+                call(new Error(response.statusMessage));
             }
         });
     };
