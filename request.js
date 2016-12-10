@@ -2,16 +2,16 @@
 
 var https = require('https');
 
-exports.get = function (options, onSuccess, onError) {
-    https.get(options, getResponseCallback(onError, onSuccess)).end();
+exports.get = function (options, callback) {
+    https.get(options, getResponseCallback(callback)).end();
 };
-exports.post = function (options, body, onSuccess, onError) {
+exports.post = function (options, body, callback) {
     options.method = 'POST';
-    var request = https.request(options, getResponseCallback(onError, onSuccess));
+    var request = https.request(options, getResponseCallback(callback));
     request.end(body);
 };
 
-function getResponseCallback(reject, resolve) {
+function getResponseCallback(callback) {
     return function (response) {
         var data = '';
         var hasError = false;
@@ -19,12 +19,12 @@ function getResponseCallback(reject, resolve) {
             data += chunk;
         });
         response.on('error', function (err) {
-            reject(err);
+            callback(err);
             hasError = true;
         });
         response.on('end', function () {
             if (!hasError) {
-                resolve(data);
+                callback(null, data);
             }
         });
     };

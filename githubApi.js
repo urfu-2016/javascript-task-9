@@ -1,11 +1,9 @@
 'use strict';
 
 var fs = require('fs');
-var url = require('url');
 var request = require('./request');
+var flow = require('flow');
 
-var API_HOSTNAME = 'api.github.com';
-var USER_AGENT = 'Node.js';
 var TOKEN = '';
 try {
     TOKEN = fs.readFileSync('token.txt', 'ascii').trim();
@@ -14,56 +12,39 @@ try {
 }
 function getOptions(orgPath) {
     return {
-        host: API_HOSTNAME,
-        path: orgPath.path,
+        host: 'api.github.com',
+        path: orgPath,
         headers:
         {
             'Authorization': 'Bearer ' + TOKEN,
-            'User-Agent': USER_AGENT
-        }
-    };
-}
-
-function getGetJSONParse(callback) {
-    return function (data) {
-        try {
-            callback(null, JSON.parse(data));
-        } catch (e) {
-            callback(e);
+            'User-Agent': 'Github README reader by Mozalov Pavel'
         }
     };
 }
 
 exports.getRepos = function (org, callback) {
-    var orgPath = url.parse('/orgs/' + org + '/repos');
-    request.get(getOptions(orgPath), getGetJSONParse(callback), callback);
+    var orgPath = '/orgs/' + org + '/repos';
+    var getRequest = request.get.bind(null, getOptions(orgPath));
+    flow.serial([getRequest, flow.makeAsync(JSON.parse)], callback);
 };
 
 exports.getRepo = function (owner, repo, callback) {
-    var orgPath = url.parse('/repos/' + owner + '/' + repo);
-    request.get(getOptions(orgPath), getGetJSONParse(callback), callback);
+    var orgPath = '/repos/' + owner + '/' + repo;
+    var getRequest = request.get.bind(null, getOptions(orgPath));
+    flow.serial([getRequest, flow.makeAsync(JSON.parse)], callback);
 };
 
 exports.getMarkdown = function (owner, repo, callback) {
-    var orgPath = url.parse('/repos/' + owner + '/' + repo + '/readme');
-    function resolve(data) {
-        var parsed = '';
-        try {
-            parsed = JSON.parse(data);
-            var content = new Buffer(parsed.content, 'base64').toString('utf-8');
-            callback(null, content);
-        } catch (e) {
-            callback(e);
-        }
+    var orgPath = '/repos/' + owner + '/' + repo + '/readme';
+    function contentDecode(data) {
+        return new Buffer(data.content, 'base64').toString('utf-8');
     }
-    request.get(getOptions(orgPath), resolve, callback);
+    var getRequest = request.get.bind(null, getOptions(orgPath));
+    flow.serial([getRequest, flow.makeAsync(JSON.parse), flow.makeAsync(contentDecode)], callback);
 };
 
 exports.renderMarkdown = function (markdown, callback) {
-    var options = getOptions(url.parse('/markdown/raw'));
+    var options = getOptions('/markdown/raw');
     options.headers['Content-Type'] = 'text/plain';
-    function contentResolve(data) {
-        callback(null, data);
-    }
-    request.post(options, markdown, contentResolve, callback);
+    request.post(options, markdown, callback);
 };
