@@ -8,7 +8,7 @@ var HTTPS_PORT = 443;
 var DEFAULT_HEADERS = {
     'Content-Type': 'text/plain;charset=utf-8',
     'User-Agent': 'Gallyam repo browser'
-}
+};
 
 function createOptions(token, path, method) {
     return {
