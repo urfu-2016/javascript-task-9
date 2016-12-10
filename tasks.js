@@ -1,15 +1,22 @@
 'use strict';
 
-var flow = require('flow');
+exports.isStar = true;
 var GithubRepositoriesAPI = require('./api.js');
-
 var API = new GithubRepositoriesAPI('urfu-2016', 'token.txt');
 
 /**
- * Сделано задание на звездочку
- * Реализовано получение html
+ * Выбрать нужные поля
+ * @param {Array<String>} fields - поля
+ * @param {Object} task - объект со ВСЕМИ полями
+ * @returns {Object} - полученный обрезок
  */
-exports.isStar = true;
+function formatTask(fields, task) {
+    return fields.reduce(function (result, field) {
+        result[field] = task[field];
+
+        return result;
+    }, {});
+}
 
 /**
  * Получение списка задач
@@ -17,15 +24,13 @@ exports.isStar = true;
  * @param {Function} callback
  */
 exports.getList = function (category, callback) {
-    var format = function (task) {
-        return { name: task.name, description: task.description };
-    };
-
     API.getAllByCategory(category, function (error, data) {
         if (error) {
             callback(error);
+        } else {
+            var fields = ['name', 'description'];
+            callback(null, data.map(formatTask.bind(null, fields)));
         }
-        flow.map(data, format, callback);
     });
 };
 
@@ -35,5 +40,12 @@ exports.getList = function (category, callback) {
  * @param {Function} callback
  */
 exports.loadOne = function (task, callback) {
-    API.getTaskById(task, callback);
+    API.getFullInfoById(task, function (error, data) {
+        if (error) {
+            callback(error);
+        } else {
+            var fields = ['name', 'description', 'markdown', 'html'];
+            callback(null, formatTask(fields, data));
+        }
+    });
 };
