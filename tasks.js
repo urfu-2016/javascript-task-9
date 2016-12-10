@@ -1,7 +1,45 @@
 'use strict';
 
 exports.isStar = false;
-var requestsAPI = require('./requestsAPI');
+//  var requestsAPI = require('./requestsAPI');
+
+function getToken() {
+    var fs = require('fs');
+    var token = '';
+    try {
+        token = '?access_token=' + fs.readFileSync('token.txt', 'utf8');
+    } catch (err) {
+        console.info(1);
+    }
+
+    return token;
+}
+
+function getOptions(path) {
+    return {
+        protocol: 'https:',
+        host: 'api.github.com',
+        path: path + getToken(),
+        method: 'get',
+        headers: { 'user-agent': 'BratBratokBratishka' }
+    };
+}
+
+function request(path, call) {
+    var https = require('https');
+    var opt = getOptions(path);
+    var callback = function (response) {
+        var str = '';
+        response.on('data', function (chunk) {
+            str += chunk;
+        });
+        response.on('end', function () {
+            call(undefined, JSON.parse(str));
+        });
+    };
+    https.request(opt, callback).end();
+}
+
 
 /**
  * Получение списка задач
@@ -10,13 +48,16 @@ var requestsAPI = require('./requestsAPI');
  */
 exports.getList = function (category, callback) {
     var listTasks = [];
-    requestsAPI.request('/orgs/urfu-2016/repos', function (err, data) {
+    request('/orgs/urfu-2016/repos', function (err, data) {
         if (err) {
             callback(err, data);
         }
         listTasks = data.filter(function (task) {
             return task.name.indexOf('javascript-task-') >= 0;
+        }).map(function (task) {
+            return { 'description': task.description, 'name': task.name };
         });
+        console.info(listTasks);
         callback(err, listTasks);
     });
 };
@@ -28,8 +69,8 @@ exports.getList = function (category, callback) {
  */
 exports.loadOne = function (task, callback) {
     var result = {};
-    requestsAPI.request('/repos/urfu-2016/' + task + '/readme', function (err1, data1) {
-        requestsAPI.request('/repos/urfu-2016/' + task, function (err2, data2) {
+    request('/repos/urfu-2016/' + task + '/readme', function (err1, data1) {
+        request('/repos/urfu-2016/' + task, function (err2, data2) {
             if (err2) {
                 callback(err2, data2);
             }
