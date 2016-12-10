@@ -10,6 +10,11 @@ var flow = require('flow');
 var api = require('./api');
 
 var ORGANIZATION = 'urfu-2016';
+var CATEGORIES = {
+    'demo': /^demo-task-\d+$/,
+    'markup': /^markup-task-\d+$/,
+    'javascript': /^javascript-task-\d+$/
+};
 
 /**
  * Получение списка задач
@@ -24,7 +29,11 @@ exports.getList = function (category, callback) {
         flow.makeAsync(function (repos) {
             return repos
                 .filter(function (repo) {
-                    return repo.name.indexOf(category + '-task-') === 0;
+                    if (!CATEGORIES[category]) {
+                        throw new Error('Invalid category');
+                    }
+
+                    return CATEGORIES[category].test(repo.name);
                 })
                 .map(function (repo) {
                     return {

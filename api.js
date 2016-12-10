@@ -1,36 +1,51 @@
 'use strict';
 
 var https = require('https');
+var fs = require('fs');
 
 var GITHUB = 'api.github.com';
-var MARKDOWN = '/markdown/raw';
+var MARKDOWN_PATH = '/markdown/raw';
 var USER_AGENT = 'Yet-Another-Github-Api-App';
 
+var authorization = null;
+try {
+    authorization = 'token ' + fs.readFileSync('token.txt', 'utf-8');
+} catch (e) {
+    console.error(e);
+}
+
 function getReposPath(organization) {
-    return '/orgs/' + organization + '/repos';
+    return ['/orgs', organization, 'repos'].join('/');
 }
 
 function getRepoPath(organization, repo) {
-    return '/repos/' + organization + '/' + repo;
+    return ['/repos', organization, repo].join('/');
 }
 
 function getRepoReadmePath(organization, repo) {
-    return getRepoPath(organization, repo) + '/readme';
+    return [getRepoPath(organization, repo), 'readme'].join('/');
+}
+
+function addAuthorization(options) {
+    if (authorization) {
+        options.headers.Authorization = authorization;
+    }
+
+    return options;
 }
 
 function getOptions(path) {
-    return {
-        method: 'GET',
+    return addAuthorization({
         host: GITHUB,
         path: path,
         headers: {
             'User-Agent': USER_AGENT
         }
-    };
+    });
 }
 
 function postOptions(path) {
-    return {
+    return addAuthorization({
         method: 'POST',
         host: GITHUB,
         path: path,
@@ -38,7 +53,7 @@ function postOptions(path) {
             'User-Agent': USER_AGENT,
             'Content-Type': 'text/plain'
         }
-    };
+    });
 }
 
 function getString(options, callback, data) {
@@ -69,33 +84,32 @@ function getString(options, callback, data) {
     request.end();
 }
 
-function returnJson(callback, error, string) {
-    if (error) {
-        callback(error, null);
-    }
+function returnJson(callback) {
+    return function (error, data) {
+        if (error) {
+            callback(error, null);
+        }
 
-    var data = null;
-    try {
-        data = JSON.parse(string);
-    } catch (e) {
-        error = e;
-    }
-
-    callback(error, data);
+        try {
+            callback(null, JSON.parse(data));
+        } catch (e) {
+            callback(e, null);
+        }
+    };
 }
 
 exports.getRepos = function (organization, callback) {
-    getString(getOptions(getReposPath(organization)), returnJson.bind(null, callback));
+    getString(getOptions(getReposPath(organization)), returnJson(callback));
 };
 
 exports.getRepo = function (organization, repo, callback) {
-    getString(getOptions(getRepoPath(organization, repo)), returnJson.bind(null, callback));
+    getString(getOptions(getRepoPath(organization, repo)), returnJson(callback));
 };
 
 exports.getRepoReadme = function (organization, repo, callback) {
-    getString(getOptions(getRepoReadmePath(organization, repo)), returnJson.bind(null, callback));
+    getString(getOptions(getRepoReadmePath(organization, repo)), returnJson(callback));
 };
 
 exports.getHtml = function (markdown, callback) {
-    getString(postOptions(MARKDOWN), callback, markdown);
+    getString(postOptions(MARKDOWN_PATH), callback, markdown);
 };
