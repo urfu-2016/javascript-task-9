@@ -18,7 +18,7 @@ var options = {
     }
 };
 
-function makeRequest(callback, url) {
+function makeRequest(callback) {
     https
         .request(options, function (rCallback, response) {
             var buffer = new Buffer('', 'utf8');
