@@ -15,17 +15,19 @@ exports.isStar = false;
  * @param {Function} callback
  */
 
+var ORGANIZATION = 'urfu-2016';
+
 exports.getList = function (category, callback) {
-    var result = [];
-    githubApi.getRepos('urfu-2016', function (err, data) {
+    // var result = [];
+    githubApi.getRepos(ORGANIZATION, function (err, data) {
         if (err) {
             callback(err, null);
         }
         var arr = data.filter(function (task) {
-            return task.name.indexOf(category + '-task') + 1;
+            return task.name.indexOf(category + '-task') !== -1;
         });
-        arr.forEach(function (item) {
-            result.push({ name: item.name, description: item.description });
+        var result = arr.map(function (task) {
+            return { name: task.name, description: task.description };
         });
         callback(err, result);
     });
@@ -40,23 +42,24 @@ exports.loadOne = function (task, callback) {
     var result = {};
     flow.serial([
         function (next) {
-            githubApi.getRepoInfo(task, 'urfu-2016', function (err, data) {
-                if (err) {
-                    callback(err, null);
+            githubApi.getRepoInfo(task, ORGANIZATION, function (error, data) {
+                if (error) {
+                    callback(error, null);
                 }
                 result.name = data.name;
                 result.description = data.description;
-                next(err, result);
+                next(error, result);
             });
         },
         function (results, next) {
-            githubApi.getReadMe(task, 'urfu-2016', function (err, data) {
+            githubApi.getReadMe(task, ORGANIZATION, function (error, data) {
                 try {
                     result.markdown = new Buffer(data.content, 'base64').toString('utf-8');
                 } catch (e) {
                     result.markdown = '';
+                    console.info('bad content');
                 }
-                next(err, result);
+                next(error, result);
             });
         }
     ], callback);

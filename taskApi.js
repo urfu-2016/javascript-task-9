@@ -3,23 +3,15 @@
 var fs = require('fs');
 var https = require('https');
 var API_HOST = 'api.github.com';
-var TOKEN;
+var TOKEN = '';
 try {
     TOKEN = 'token ' + fs.readFileSync('token.txt', 'utf-8');
 } catch (e) {
-    TOKEN = '';
+    console.info('token not found');
 }
 
-function sendRequest(options, callback) {
-    options.host = API_HOST;
-    options.method = 'GET';
-    if (TOKEN) {
-        options.headers = {
-            'authorization': TOKEN,
-            'User-Agent': 'zeaceApp'
-        };
-    }
-    var request = https.request(options);
+function sendRequest(url, callback) {
+    var request = https.request(getOptions(url));
     request.on('response', function (response) {
         var body = '';
         response.on('data', function (chunk) {
@@ -41,19 +33,33 @@ function sendRequest(options, callback) {
     request.end();
 }
 
+function getOptions(url) {
+    var options = {};
+    options.host = API_HOST;
+    options.path = url;
+    if (TOKEN) {
+        options.headers = {
+            'authorization': TOKEN,
+            'User-Agent': 'zeaceApp'
+        };
+    }
+
+    return options;
+}
+
 exports.getRepos = function (org, callback) {
     var url = '/orgs/' + org + '/repos';
-    sendRequest({ path: url }, callback);
+    sendRequest(url, callback);
 };
 
 exports.getRepoInfo = function (task, org, callback) {
     var url = '/repos/' + org + '/' + task;
-    sendRequest({ path: url }, callback);
+    sendRequest(url, callback);
 };
 
 exports.getReadMe = function (task, org, callback) {
     var url = '/repos/' + org + '/' + task + '/readme';
-    sendRequest({ path: url }, callback);
+    sendRequest(url, callback);
 };
 
 
