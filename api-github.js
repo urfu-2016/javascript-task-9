@@ -41,7 +41,11 @@ function sendRequest(method, url, body, callback) {
         });
         response.on('error', callback);
         response.on('end', function () {
-            callback(null, data);
+            if (response.statusCode === 200) {
+                callback(null, data);
+            } else {
+                callback(new Error());
+            }
         });
     };
 
