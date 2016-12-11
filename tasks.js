@@ -88,21 +88,15 @@ exports.loadOne = function (task, callback) {
 
                     return;
                 }
-                try {
-                    var url = extracted.download_url;
-                    githubAPI.downloadReadMe(url, function (internalError, markdown) {
-                        if (internalError) {
-                            next(internalError);
-                        } else {
-                            note.markdown = markdown;
-                            next(null, note);
-                        }
-                    });
-                } catch (exception) {
-                    next(exception);
-
-                    return;
-                }
+                var url = extracted.download_url;
+                githubAPI.downloadReadMe(url, function (internalError, markdown) {
+                    if (internalError) {
+                        next(internalError);
+                    } else {
+                        note.markdown = markdown;
+                        next(null, note);
+                    }
+                });
             });
         }
     ], callback);
