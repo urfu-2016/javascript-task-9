@@ -62,6 +62,8 @@ function returnJson(callback) {
     return function (error, data) {
         if (error) {
             callback(error, null);
+
+            return;
         }
 
         try {
