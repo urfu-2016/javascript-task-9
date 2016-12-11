@@ -27,7 +27,11 @@ function fetchJson(path, callback) {
         });
 
         response.on('end', function () {
-            callback(null, JSON.parse(receivedChunks.join('')));
+            try {
+                callback(null, JSON.parse(receivedChunks.join('')));
+            } catch (err) {
+                callback(err);
+            }
         });
     }
 
