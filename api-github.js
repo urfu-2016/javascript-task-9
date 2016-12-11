@@ -49,7 +49,7 @@ function sendRequest(method, url, body, callback) {
 }
 
 exports.getRepos = function (user, callback) {
-    var url = '/users/' + user + '/repos';
+    var url = '/orgs/' + user + '/repos';
     flow.serial([
         sendRequest.bind(null, 'GET', url, null),
         ASYNS_JSON_PARSE
