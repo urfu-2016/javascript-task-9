@@ -3,6 +3,7 @@
 var fs = require('fs');
 var path = require('path');
 var https = require('https');
+
 var PATH_TO_TOKEN = path.join(__dirname, 'token.txt');
 var TOKEN = '';
 
@@ -12,8 +13,13 @@ try {
     console.info(error);
 }
 
+/**
+ * Получаем опции для запроса
+ * @param {String} requestPath – путь до репозитория, куда api должно обратиться
+ * @returns {Object}
+ */
 function getOptions(requestPath) {
-    var options = {
+    return {
         hostname: 'api.github.com',
         path: requestPath + '?auth_token=' + TOKEN,
         method: 'GET',
@@ -21,16 +27,24 @@ function getOptions(requestPath) {
             'User-Agent': 'another-agent'
         }
     };
-
-    return options;
 }
 
+/**
+ * Проверяем код ответа, если 200, то запрос выполнен успешно
+ * @param {Object} res – объект данных ответа
+ * @returns {Boolean}
+ */
 function isSuccessfully(res) {
     var successCode = 200;
 
     return res.statusCode === successCode;
 }
 
+/**
+ * Запрашиваем данные
+ * @param {Object} options – опции для запроса
+ * @param {Function} callback
+ */
 function createRequest(options, callback) {
     var finalResult = '';
     var result = '';
