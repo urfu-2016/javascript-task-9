@@ -21,8 +21,6 @@ exports.getList = function (category, callback) {
     function extract(error, extracted) {
         if (error) {
             callback(error);
-
-            return;
         } else {
             var template = category + '-task';
             try {
@@ -74,6 +72,8 @@ exports.loadOne = function (task, callback) {
                     next(null, note);
                 } else {
                     callback(error);
+
+                    return;
                 }
             });
         },
