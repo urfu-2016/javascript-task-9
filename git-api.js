@@ -25,6 +25,12 @@ function getOptions(requestPath) {
     return options;
 }
 
+function isSuccessfully(res) {
+    var successCode = 200;
+
+    return res.statusCode === successCode;
+}
+
 function createRequest(options, callback) {
     var finalResult = '';
     var result = '';
@@ -33,13 +39,20 @@ function createRequest(options, callback) {
             result += data;
         });
         res.on('end', function () {
-            finalResult = Buffer.from(result);
-            callback(null, JSON.parse(finalResult.toString()));
-
+            if (isSuccessfully(res)) {
+                try {
+                    finalResult = Buffer.from(result);
+                    callback(null, JSON.parse(finalResult.toString()));
+                } catch (error) {
+                    callback(error);
+                }
+            } else {
+                callback(new Error());
+            }
         });
 
     });
-
+    req.on('error', callback);
     req.end();
 }
 
