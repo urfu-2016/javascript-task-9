@@ -89,6 +89,8 @@ exports.loadOne = function (task, callback) {
                     try {
                         githubAPI.downloadReadMe(url, function (internalError, markdown) {
                             if (!internalError) {
+                                console.info(internalError);
+                                console.info(!internalError);
                                 note.markdown = markdown;
                                 next(null, note);
                             } else {
