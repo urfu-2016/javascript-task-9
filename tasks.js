@@ -17,6 +17,10 @@ exports.isStar = false;
 exports.getList = function (category, callback) {
     var result = [];
     gitApi.getRepositories(function (error, repositories) {
+        if (error) {
+            callback(error, null);
+        }
+
         result = repositories.filter(function (repository) {
             return repository.name.match(category + '-task');
         }).reduce(function (listRepositories, data) {
@@ -42,6 +46,9 @@ exports.loadOne = function (task, callback) {
         function (nextCallback) {
             var path = '/repos/urfu-2016/' + task;
             gitApi.getRepositoriesInfo(path, function (error, data) {
+                if (error) {
+                    callback(error, null);
+                }
                 nextCallback(null, {
                     name: data.name,
                     description: data.description
@@ -51,6 +58,10 @@ exports.loadOne = function (task, callback) {
         function (info, nextCallback) {
             var path = '/repos/urfu-2016/' + task + '/readme';
             gitApi.getRepositoriesInfo(path, function (error, data) {
+                if (error) {
+                    callback(error, null);
+                }
+                
                 info.markdown = new Buffer(data.content, 'base64').toString();
                 nextCallback(null, info);
 
