@@ -14,7 +14,7 @@ var TOKEN;
 try {
     TOKEN = fs.readFileSync(TOKEN_FILE_PATH, 'utf8');
 } catch (e) {
-    TOKEN = '';
+    throw new Error('token.txt wasn\'t found');
 }
 
 var REQUEST_DATA = {
