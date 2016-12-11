@@ -23,16 +23,16 @@ function makeRequest(callback, url) {
         options = url;
     }
     https
-        .request(options, function (response) {
+        .request(options, function (rCallback, response) {
             var buffer = new Buffer('', 'utf8');
-            response.on('error', callback);
+            response.on('error', rCallback);
             response.on('data', function (chunk) {
                 buffer = Buffer.concat([buffer, chunk]);
             });
             response.on('end', function () {
-                callback(null, buffer.toString('utf8'));
+                rCallback(null, buffer.toString('utf8'));
             });
-        })
+        }.bind(null, callback))
         .end();
 }
 
