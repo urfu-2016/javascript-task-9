@@ -19,9 +19,6 @@ var options = {
 };
 
 function makeRequest(callback, url) {
-    if (url) {
-        options = url;
-    }
     https
         .request(options, function (rCallback, response) {
             var buffer = new Buffer('', 'utf8');
@@ -52,6 +49,17 @@ exports.getReadMe = function (task, callback) {
 };
 
 exports.downloadReadMe = function (url, callback) {
-    makeRequest(callback, url);
+    https
+        .request(url, function (rCallback, response) {
+            var buffer = new Buffer('', 'utf8');
+            response.on('error', rCallback);
+            response.on('data', function (chunk) {
+                buffer = Buffer.concat([buffer, chunk]);
+            });
+            response.on('end', function () {
+                rCallback(null, buffer.toString('utf8'));
+            });
+        }.bind(null, callback))
+        .end();
 };
 
