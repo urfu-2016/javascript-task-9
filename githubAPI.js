@@ -6,7 +6,7 @@ var token;
 
 try {
     token = 'token ' + fs.readFileSync('./token.txt', 'utf-8');
-} catch (e) {
+} catch (exception) {
     token = '';
 }
 var options = {
