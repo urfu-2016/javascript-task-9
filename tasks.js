@@ -29,7 +29,7 @@ exports.getList = function (category, callback) {
             }
             result = extracted
                 .filter(function (task) {
-                    return task.name.indexOf(template) !== -1;
+                    return task.name.indexOf(template) === 0;
                 })
                 .map(function (repository) {
                     var note = {
@@ -43,7 +43,6 @@ exports.getList = function (category, callback) {
         }
     }
     githubAPI.getList(extract);
-    console.info(category, callback);
 };
 
 /**
@@ -59,7 +58,9 @@ exports.loadOne = function (task, callback) {
                     try {
                         extracted = JSON.parse(extracted);
                     } catch (exception) {
-                        callback(exception);
+                        next(exception);
+
+                        return;
                     }
                     var note = {
                         'name': extracted.name,
@@ -68,6 +69,8 @@ exports.loadOne = function (task, callback) {
                     next(null, note);
                 } else {
                     callback(error);
+
+                    return;
                 }
             });
         },
@@ -78,11 +81,12 @@ exports.loadOne = function (task, callback) {
                         extracted = JSON.parse(extracted);
                     } catch (exception) {
                         next(exception);
+
+                        return;
                     }
                     var url = extracted.download_url;
                     githubAPI.downloadReadMe(url, function (internalError, markdown) {
                         if (!internalError) {
-                            console.info(markdown);
                             note.markdown = markdown;
                             next(null, note);
                         } else {
