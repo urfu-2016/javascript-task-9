@@ -46,8 +46,8 @@ exports.loadOne = function (task, callback) {
             api.getRepo('urfu-2016', task, function (err, repo) {
                 if (err) {
                     next(err);
-					
-					return;
+
+                    return;
                 }
                 repo = {
                     name: repo.name,
@@ -61,8 +61,8 @@ exports.loadOne = function (task, callback) {
             api.getReadme('urfu-2016', task, function (err, readme) {
                 if (err) {
                     next(err);
-					
-					return;
+
+                    return;
                 }
                 repo.markdown = new Buffer(readme.content, readme.encoding).toString('utf-8');
                 next(err, repo);
@@ -73,8 +73,8 @@ exports.loadOne = function (task, callback) {
             api.readmeToHtml(repo.markdown, function (err, html) {
                 if (err) {
                     next(err);
-					
-					return;
+
+                    return;
                 }
                 repo.html = html;
                 next(err, repo);
