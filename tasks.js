@@ -15,11 +15,6 @@ var flow = require('flow');
  */
 exports.getList = function (category, callback) {
     var result;
-    if (category !== 'demo' && category !== 'javascript' && category !== 'markup') {
-        callback(new Error('Bad format'));
-
-        return;
-    }
     function extract(error, extracted) {
         if (error) {
             callback(error);
