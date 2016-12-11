@@ -57,7 +57,7 @@ function postOptions(path) {
 }
 
 function getString(options, callback, data) {
-    function requestCallback(response) {
+    https.request(options, function (response) {
         var buffer = '';
         var callbackCalled = false;
 
@@ -75,13 +75,7 @@ function getString(options, callback, data) {
                 callback(null, buffer);
             }
         });
-    }
-
-    var request = https.request(options, requestCallback);
-    if (data) {
-        request.write(data);
-    }
-    request.end();
+    }).end(data);
 }
 
 function returnJson(callback) {
