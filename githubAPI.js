@@ -2,13 +2,19 @@
 
 var https = require('https');
 var fs = require('fs');
+var token;
 
+try {
+    token = 'token ' + fs.readFileSync('./token.txt', 'utf-8');
+} catch (e) {
+    token = '';
+}
 var options = {
     host: 'api.github.com',
     method: 'GET',
     headers: {
         'user-agent': 'node.js',
-        'Authorization': 'token ' + fs.readFileSync('./token.txt', 'utf-8')
+        'Authorization': token
     }
 };
 
