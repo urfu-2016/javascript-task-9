@@ -25,22 +25,13 @@ function makeRequest(callback, url) {
     https
         .request(options, function (response) {
             var buffer = new Buffer('', 'utf8');
+            response.on('error', callback);
             response.on('data', function (chunk) {
                 buffer = Buffer.concat([buffer, chunk]);
             });
             response.on('end', function () {
-
-                if (response.statusCode === 200) {
-                    try {
-                        callback(null, buffer.toString('utf8'));
-                    } catch (error) {
-                        callback(error);
-                    }
-                } else {
-                    callback(new Error('bad status code'));
-                }
+                callback(null, buffer.toString('utf8'));
             });
-
         })
         .end();
 }
