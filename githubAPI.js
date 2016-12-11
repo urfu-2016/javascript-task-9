@@ -50,7 +50,7 @@ exports.getReadMe = function (task, callback) {
 
 exports.downloadReadMe = function (url, callback) {
     https
-        .request(url, function (callback, response) {
+        .request(url, function (response) {
             var buffer = new Buffer('', 'utf8');
             response.on('error', callback);
             response.on('data', function (chunk) {
