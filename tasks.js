@@ -79,7 +79,11 @@ exports.loadOne = function (task, callback) {
         },
         function (note, next) {
             githubAPI.getReadMe(task, function (error, extracted) {
-                if (!error) {
+                if (error) {
+                    next(error);
+
+                    return;
+                } else {
                     try {
                         extracted = JSON.parse(extracted);
                     } catch (exception) {
@@ -87,25 +91,21 @@ exports.loadOne = function (task, callback) {
 
                         return;
                     }
-                    var url = extracted.download_url;
                     try {
+                        var url = extracted.download_url;
                         githubAPI.downloadReadMe(url, function (internalError, markdown) {
-                            if (!internalError) {
-                                console.info(internalError);
-                                console.info(!internalError);
+                            if (internalError) {
+                                next(internalError);
+                            } else {
                                 note.markdown = markdown;
                                 next(null, note);
-                            } else {
-                                next(internalError);
                             }
                         });
                     } catch (exception) {
                         next(exception);
-                    }
-                } else {
-                    next(error);
 
-                    return;
+                        return;
+                    }
                 }
             });
         }
