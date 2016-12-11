@@ -23,7 +23,7 @@ exports.getList = function (category, callback) {
             try {
                 extracted = JSON.parse(extracted);
             } catch (exception) {
-                callback(error);
+                callback(exception);
 
                 return;
             }
