@@ -17,7 +17,7 @@ exports.getList = function (category, callback) {
     var result;
     if (category !== 'demo' && category !== 'javascript' && category !== 'markup') {
         callback(new Error('Bad format'));
-        
+
         return;
     }
     function extract(error, extracted) {
@@ -34,7 +34,7 @@ exports.getList = function (category, callback) {
             }
             result = extracted
                 .filter(function (task) {
-                    return task.name.indexOf(template) !== -1;
+                    return task.name.indexOf(template) === 0;
                 })
                 .map(function (repository) {
                     var note = {
