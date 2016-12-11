@@ -44,7 +44,7 @@ function sendRequest(method, url, body, callback) {
             if (response.statusCode === 200) {
                 callback(null, data);
             } else {
-                callback(new Error());
+                callback(new Error('No connect));
             }
         });
     };
