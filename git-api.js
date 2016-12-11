@@ -30,17 +30,6 @@ function getOptions(requestPath) {
 }
 
 /**
- * Проверяем код ответа, если 200, то запрос выполнен успешно
- * @param {Object} res – объект данных ответа
- * @returns {Boolean}
- */
-function isSuccessfully(res) {
-    var successCode = 200;
-
-    return res.statusCode === successCode;
-}
-
-/**
  * Запрашиваем данные
  * @param {Object} options – опции для запроса
  * @param {Function} callback
@@ -53,25 +42,30 @@ function createRequest(options, callback) {
             result += data;
         });
         res.on('end', function () {
-            if (isSuccessfully(res)) {
-                try {
-                    finalResult = Buffer.from(result);
-                    callback(null, JSON.parse(finalResult.toString()));
-                } catch (error) {
-                    callback(error);
-                }
-            } else {
-                callback(new Error());
+            if (res.statusCode !== 200) {
+                callback(new Error('response code ' + res.statusCode));
+
+                return;
+            }
+            try {
+                finalResult = Buffer.from(result);
+                callback(null, JSON.parse(finalResult.toString()));
+            } catch (error) {
+                callback(error);
             }
         });
 
     });
-    req.on('error', callback);
+
+    req.on('error', function (error) {
+        console.error(error);
+    });
+
     req.end();
 }
 
-exports.getRepositories = function (callback) {
-    createRequest(getOptions('/orgs/urfu-2016/repos'), callback);
+exports.getRepositories = function (requestPath, callback) {
+    createRequest(getOptions(requestPath), callback);
 };
 
 exports.getRepositoriesInfo = function (requestPath, callback) {

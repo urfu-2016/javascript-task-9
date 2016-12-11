@@ -15,25 +15,35 @@ exports.isStar = false;
  * @param {Function} callback
  */
 exports.getList = function (category, callback) {
-    var result = [];
-    gitApi.getRepositories(function (error, repositories) {
-        if (error) {
-            callback(error, null);
-        }
+    flow.serial([
+        function (nextCallback) {
+            var path = '/orgs/urfu-2016/repos';
+            gitApi.getRepositories(path, function (error, repositories) {
+                if (error) {
+                    callback(error, null);
 
-        result = repositories.filter(function (repository) {
-            return repository.name.match(category + '-task');
-        }).reduce(function (listRepositories, data) {
-            listRepositories.push({
-                name: data.name,
-                description: data.description
+                    return;
+                }
+                nextCallback(null, repositories);
             });
+        },
+        function (repositories, nextCallback) {
+            var result = repositories
+                .filter(function (repository) {
+                    return repository.name.match(category + '-task');
+                })
+                .reduce(function (listRepositories, data) {
+                    listRepositories.push({
+                        name: data.name,
+                        description: data.description
+                    });
 
-            return listRepositories;
-        }, []);
+                    return listRepositories;
+                }, []);
 
-        callback(null, result);
-    });
+            nextCallback(null, result);
+        }
+    ], callback);
 };
 
 /**
@@ -48,6 +58,8 @@ exports.loadOne = function (task, callback) {
             gitApi.getRepositoriesInfo(path, function (error, data) {
                 if (error) {
                     callback(error, null);
+
+                    return;
                 }
                 nextCallback(null, {
                     name: data.name,
