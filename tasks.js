@@ -44,6 +44,11 @@ exports.loadOne = function (task, callback) {
     flow.serial([
         function (next) {
             api.getRepo('urfu-2016', task, function (err, repo) {
+                if (err) {
+                    next(err);
+					
+					return;
+                }
                 repo = {
                     name: repo.name,
                     description: repo.description
@@ -54,6 +59,11 @@ exports.loadOne = function (task, callback) {
 
         function (repo, next) {
             api.getReadme('urfu-2016', task, function (err, readme) {
+                if (err) {
+                    next(err);
+					
+					return;
+                }
                 repo.markdown = new Buffer(readme.content, readme.encoding).toString('utf-8');
                 next(err, repo);
             });
@@ -61,6 +71,11 @@ exports.loadOne = function (task, callback) {
 
         function (repo, next) {
             api.readmeToHtml(repo.markdown, function (err, html) {
+                if (err) {
+                    next(err);
+					
+					return;
+                }
                 repo.html = html;
                 next(err, repo);
             });
