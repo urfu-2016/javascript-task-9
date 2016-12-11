@@ -23,7 +23,13 @@ exports.getList = function (category, callback) {
             callback(error, null);
         } else {
             var template = category + '-task';
-            extracted = JSON.parse(extracted);
+            try {
+                extracted = JSON.parse(extracted);
+            } catch (exception) {
+                callback(error, null);
+
+                return;
+            }
             result = extracted
                 .filter(function (task) {
                     return task.name.indexOf(template) !== -1;
@@ -52,7 +58,13 @@ exports.loadOne = function (task, callback) {
         function (next) {
             githubAPI.getRepository(task, function (error, extracted) {
                 if (!error) {
-                    extracted = JSON.parse(extracted);
+                    try {
+                        extracted = JSON.parse(extracted);
+                    } catch (exception) {
+                        next(exception, null);
+
+                        return;
+                    }
                     var note = {
                         'name': extracted.name,
                         'description': extracted.description
@@ -66,16 +78,26 @@ exports.loadOne = function (task, callback) {
         function (note, next) {
             githubAPI.getReadMe(task, function (error, extracted) {
                 if (!error) {
-                    extracted = JSON.parse(extracted);
+                    try {
+                        extracted = JSON.parse(extracted);
+                    } catch (exception) {
+                        next(exception);
+
+                        return;
+                    }
                     var url = extracted.download_url;
-                    githubAPI.downloadReadMe(url, function (internalError, markdown) {
-                        if (!internalError) {
-                            note.markdown = markdown;
-                            next(null, note);
-                        } else {
-                            next(internalError);
-                        }
-                    });
+                    try {
+                        githubAPI.downloadReadMe(url, function (internalError, markdown) {
+                            if (!internalError) {
+                                note.markdown = markdown;
+                                next(null, note);
+                            } else {
+                                next(internalError);
+                            }
+                        });
+                    } catch (exception) {
+                        next(exception);
+                    }
                 } else {
                     next(error);
                 }
