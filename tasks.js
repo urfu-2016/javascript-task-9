@@ -61,7 +61,6 @@ exports.loadOne = function (task, callback) {
                 if (error) {
                     callback(error, null);
                 }
-                
                 info.markdown = new Buffer(data.content, 'base64').toString();
                 nextCallback(null, info);
 
