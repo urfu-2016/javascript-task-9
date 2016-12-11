@@ -16,17 +16,19 @@ var flow = require('flow');
 exports.getList = function (category, callback) {
     var result;
     if (category !== 'demo' && category !== 'javascript' && category !== 'markup') {
-        callback(new Error('Bad format'), null);
+        callback(new Error('Bad format'));
     }
     function extract(error, extracted) {
         if (error) {
-            callback(error, null);
+            callback(error);
+
+            return;
         } else {
             var template = category + '-task';
             try {
                 extracted = JSON.parse(extracted);
             } catch (exception) {
-                callback(error, null);
+                callback(error);
 
                 return;
             }
