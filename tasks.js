@@ -24,6 +24,8 @@ exports.getList = function (category, callback) {
                 extracted = JSON.parse(extracted);
             } catch (exception) {
                 callback(exception);
+
+                return;
             }
             result = extracted
                 .filter(function (task) {
