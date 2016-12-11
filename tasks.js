@@ -56,72 +56,59 @@ exports.getList = function (category, callback) {
  * @param {Function} callback
  */
 exports.loadOne = function (task, callback) {
-    flow.serial(
-        [
-            function (next) {
-                githubAPI.getRepository(task, repCallb.bind(null, next, callback));
-            },
-            function (item, next) {
-                githubAPI.getReadMe(task, readMeInfoCallb.bind(null, next, item));
-            }
-        ],
-        callback
-    );
+    flow.serial([
+        function (next) {
+            githubAPI.getRepository(task, function (error, extracted) {
+                if (!error) {
+                    try {
+                        extracted = JSON.parse(extracted);
+                    } catch (exception) {
+                        next(exception);
+
+                        return;
+                    }
+                    var note = {
+                        'name': extracted.name,
+                        'description': extracted.description
+                    };
+                    next(null, note);
+                } else {
+                    callback(error);
+
+                    return;
+                }
+            });
+        },
+        function (note, next) {
+            githubAPI.getReadMe(task, function (error, extracted) {
+                if (error) {
+                    next(error);
+
+                    return;
+                }
+                try {
+                    extracted = JSON.parse(extracted);
+                } catch (exception) {
+                    next(exception);
+
+                    return;
+                }
+                try {
+                    var url = extracted.download_url;
+                    githubAPI.downloadReadMe(url, function (internalError, markdown) {
+                        if (internalError) {
+                            next(internalError);
+                        } else {
+                            note.markdown = markdown;
+                            next(null, note);
+                        }
+                    });
+                } catch (exception) {
+                    next(exception);
+
+                    return;
+                }
+            });
+        }
+    ], callback);
 };
-
-function repCallb(next, callback, err, data) {
-    if (err) {
-        callback(err);
-
-        return;
-    }
-
-    try {
-        data = JSON.parse(data);
-    } catch (e) {
-        next(e);
-
-        return;
-    }
-
-    next(null, {
-        name: data.name,
-        description: data.description
-    });
-}
-
-function readMeInfoCallb(next, item, err, response) {
-    if (err) {
-        next(err);
-        console.info(1);
-
-        return;
-    }
-
-    try {
-        response = JSON.parse(response);
-    } catch (e) {
-        next(e);
-        console.info(1);
-
-        return;
-    }
-
-    console.info(1);
-
-    githubAPI.downloadReadMe(
-        response.download_url,
-        readmeLoadFileCallback.bind(null, next, item)
-    );
-}
-
-function readmeLoadFileCallback(next, item, err, response) {
-    if (err) {
-        next(err);
-        console.info(1);
-    } else {
-        item.markdown = response;
-        console.info(1);
-        next(null, item);
-    }
-}
