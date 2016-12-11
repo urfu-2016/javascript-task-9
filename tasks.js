@@ -29,7 +29,7 @@ exports.getList = function (category, callback) {
                 return {
                     name: repo.name,
                     description: repo.description
-                }
+                };
             });
         callback(null, filteredRepos);
     });
@@ -54,14 +54,14 @@ exports.loadOne = function (task, callback) {
 
         function (repo, next) {
             api.getReadme('urfu-2016', task, function (err, readme) {
-                repo['markdown'] = new Buffer(readme.content, readme.encoding).toString('utf-8');
+                repo.markdown = new Buffer(readme.content, readme.encoding).toString('utf-8');
                 next(err, repo);
             });
         },
 
         function (repo, next) {
-            api.readmeToHtml(repo['markdown'], function (err, html) {
-                repo['html'] = html;
+            api.readmeToHtml(repo.markdown, function (err, html) {
+                repo.html = html;
                 next(err, repo);
             });
         }
