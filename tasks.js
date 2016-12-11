@@ -61,7 +61,7 @@ exports.loadOne = function (task, callback) {
                     try {
                         extracted = JSON.parse(extracted);
                     } catch (exception) {
-                        next(exception, null);
+                        next(exception);
 
                         return;
                     }
@@ -100,6 +100,8 @@ exports.loadOne = function (task, callback) {
                     }
                 } else {
                     next(error);
+
+                    return;
                 }
             });
         }
