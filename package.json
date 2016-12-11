@@ -10,6 +10,7 @@
     "eslint-config-hrundel": "latest",
     "mocha": "3.1.0",
     "nock": "9.0.2",
-    "flow": "git://github.com/IrinaSed/javascript-task-8"
+    "flow": "git://github.com/IrinaSed/javascript-task-8",
+    "request": "latest"
   }
 }
