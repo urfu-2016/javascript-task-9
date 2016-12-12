@@ -9,7 +9,7 @@ function getToken() {
     try {
         return fs.readFileSync('token.txt', 'utf-8');
     } catch (e) {
-        throw new TypeError('Error reading from file');
+        console.info('Error reading from file');
     }
 }
 
