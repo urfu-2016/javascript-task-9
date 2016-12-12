@@ -4,21 +4,22 @@ var https = require('https');
 var fs = require('fs');
 var path_ = require('path');
 
-var API_TOKEN;
 var API_HOST = 'api.github.com';
 
 function getToken() {
     try {
         return fs.readFileSync(path_.join(__dirname, 'token.txt'), 'ascii').trim();
     } catch (error) {
+
+        /* Без токена можно делать лишь сильно ограниченное количество запросов */
         return '';
     }
 }
 
-API_TOKEN = getToken();
+var API_TOKEN = getToken();
 
-function makeRequestJson(method, options, body, callback) {
-    makeRequest(method, options, body, function (error, response) {
+function makeRequestJson(method, options, content, callback) {
+    makeRequest(method, options, content, function (error, response) {
         if (error) {
             callback(error);
 
@@ -61,9 +62,7 @@ function makeRequest(method, path, content, callback) {
         response.on('end', function () {
             callback(null, body);
         });
-    });
-    request.on('timeout', callback);
-    request.on('error', callback);
+    }).on('error', callback);
 
     if (method === 'POST') {
         request.write(content);

@@ -10,12 +10,13 @@ var flow = require('flow.js');
 exports.isStar = true;
 
 var ALLOWED_CATEGORIES = ['demo', 'javascript', 'markup'];
+var COURSE_ORGANIZATION_NAME = 'urfu-2016';
 
 function filterRepos(category, repos, callback) {
-    var taskNameStart = category + '-task';
+    var taskNamePrefix = category + '-task';
 
     callback(null, repos.reduce(function (filtered, repo) {
-        if (repo.name.startsWith(taskNameStart)) {
+        if (repo.name.startsWith(taskNamePrefix)) {
             filtered.push({
                 name: repo.name,
                 description: repo.description
@@ -36,7 +37,7 @@ exports.getList = function (category, callback) {
         callback(new Error('invalid category'));
     } else {
         flow.serial([
-            api.getOrganizationRepos.bind(global, 'urfu-2016'),
+            api.getOrganizationRepos.bind(global, COURSE_ORGANIZATION_NAME),
             filterRepos.bind(global, category)
         ], callback);
     }
@@ -51,7 +52,7 @@ exports.loadOne = function (task, callback) {
     var result = {};
 
     flow.serial([
-        api.getRepo.bind(global, 'urfu-2016', task),
+        api.getRepo.bind(global, COURSE_ORGANIZATION_NAME, task),
 
         function (repo, next) {
             result.name = repo.name;
@@ -59,7 +60,7 @@ exports.loadOne = function (task, callback) {
             next(null);
         },
 
-        api.getReadme.bind(global, 'urfu-2016', task),
+        api.getReadme.bind(global, COURSE_ORGANIZATION_NAME, task),
 
         function (readme, next) {
             result.markdown = new Buffer(readme.content, readme.encoding).toString('utf-8');
