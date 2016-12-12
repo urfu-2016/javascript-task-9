@@ -55,6 +55,7 @@ describe('tasks', function () {
                     description: tasks[number]
                 };
             });
+
             assert.deepStrictEqual(data, expected);
 
             done();
