@@ -2,25 +2,25 @@
 
 var fs = require('fs');
 var https = require('https');
-var GITHUBAPI = 'api.github.com';
+var GITHUB_API = 'api.github.com';
 var token = getToken();
 
 function getToken() {
     try {
-        return fs.readFileSync('token.txt', { encoding: 'utf-8' });
+        return fs.readFileSync('token.txt', 'utf-8');
     } catch (e) {
-        return '';
+        throw new TypeError('Error reading from file');
     }
 }
 
 
 exports.getOptions = function (path, method) {
     return {
-        host: GITHUBAPI,
+        host: GITHUB_API,
         path: path,
         method: method,
         headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64)',
+            'User-Agent': 'gitApi.js',
             'Authorization': 'Bearer ' + token,
             'Content-Type': 'text/plain'
         }
@@ -31,7 +31,7 @@ exports.getRequest = function (path, method, data, callback) {
     var options = exports.getOptions(path, method);
     var request = https.request(options);
     var parse = true;
-    if (data !== null) {
+    if (data) {
         request.write(data);
         parse = false;
     }
@@ -40,11 +40,11 @@ exports.getRequest = function (path, method, data, callback) {
         var error = null;
         response.on('data', function (chunk) {
             resultData += chunk;
-        });
-        response.on('error', function (err) {
+        })
+        .on('error', function (err) {
             error = err;
-        });
-        response.on('end', function () {
+        })
+        .on('end', function () {
             var result = resultData;
             try {
                 if (parse) {
