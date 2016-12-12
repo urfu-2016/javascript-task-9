@@ -13,7 +13,6 @@ function getToken() {
     }
 }
 
-
 exports.getOptions = function (path, method) {
     return {
         host: GITHUB_API,
