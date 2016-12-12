@@ -19,41 +19,41 @@ try {
     TOKEN = '';
 }
 
-var REQUEST_DATA = {
-    host: GITHUB_URL,
-    method: 'GET',
-    headers: {
-        'user-agent': 'node.js',
-        Authorization: 'token ' + TOKEN
-    }
-};
-
 exports.getList = function (responseCallback) {
-    REQUEST_DATA.path = LIST_METHOD;
-    https
-        .request(REQUEST_DATA, requestCallback.bind(null, responseCallback))
-        .end();
+    makeRequest(getRequestData(LIST_METHOD), requestCallback.bind(null, responseCallback));
 };
 
 exports.getRepository = function (task, responseCallback) {
-    REQUEST_DATA.path = GET_REPO_METHOD + task;
-    https
-        .request(REQUEST_DATA, requestCallback.bind(null, responseCallback))
-        .end();
+    var path = GET_REPO_METHOD + task;
+    makeRequest(getRequestData(path), requestCallback.bind(null, responseCallback));
 };
 
 exports.getReadmeInfo = function (task, responseCallback) {
-    REQUEST_DATA.path = GET_REPO_METHOD + task + README_METHOD;
-    https
-        .request(REQUEST_DATA, requestCallback.bind(null, responseCallback))
-        .end();
+    var path = GET_REPO_METHOD + task + README_METHOD;
+    makeRequest(getRequestData(path), requestCallback.bind(null, responseCallback));
 };
 
 exports.getReadmeFile = function (url, responseCallback) {
-    https
-        .request(url, requestCallback.bind(null, responseCallback))
-        .end();
+    makeRequest(url, requestCallback.bind(null, responseCallback));
 };
+
+function getRequestData(path) {
+    return {
+        host: GITHUB_URL,
+        path: path,
+        method: 'GET',
+        headers: {
+            'user-agent': 'node.js',
+            Authorization: 'token ' + TOKEN
+        }
+    };
+}
+
+function makeRequest(requestData, callback) {
+    https
+        .request(requestData, callback)
+        .end();
+}
 
 exports.getReadmeHtml = function (text, responseCallback) {
     var req = https
@@ -82,6 +82,6 @@ function requestCallback(callback, response) {
     });
 
     response.on('end', function () {
-        callback(null, responseData.toString('utf8'));
+        callback(null, responseData.toString());
     });
 }

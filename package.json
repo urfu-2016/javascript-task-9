@@ -10,7 +10,6 @@
     "eslint-config-hrundel": "latest",
     "flow": "git+https://github.com/AlSoEdit/javascript-task-8.git#35651c694e96101de758dd01519003afc84a41aa",
     "mocha": "3.1.0",
-    "nock": "9.0.2",
-    "request": "2.79.0"
+    "nock": "9.0.2"
   }
 }
