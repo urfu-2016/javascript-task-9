@@ -2,25 +2,27 @@
 
 var https = require('https');
 var fs = require('fs');
-var token;
+var TOKEN;
+var ORG_REPOS = '/orgs/urfu-2016/repos';
+var REPOS = '/repos/urfu-2016/';
 
 try {
-    token = 'token ' + fs.readFileSync('./token.txt', 'utf-8');
+    TOKEN = 'token ' + fs.readFileSync('./token.txt', 'utf-8');
 } catch (exception) {
-    token = 'token ';
+    console.error('File with token not found');
+    TOKEN = 'token ';
 }
-var options = {
+var OPTIONS = {
     host: 'api.github.com',
-    method: 'GET',
     headers: {
         'user-agent': 'node.js',
-        'Authorization': token
+        'Authorization': TOKEN
     }
 };
 
 function makeRequest(callback) {
     https
-        .request(options, function (rCallback, response) {
+        .request(OPTIONS, function (rCallback, response) {
             var buffer = new Buffer('', 'utf8');
             response.on('error', rCallback);
             response.on('data', function (chunk) {
@@ -34,17 +36,17 @@ function makeRequest(callback) {
 }
 
 exports.getList = function (callback) {
-    options.path = '/orgs/urfu-2016/repos';
+    OPTIONS.path = ORG_REPOS;
     makeRequest(callback);
 };
 
 exports.getRepository = function (task, callback) {
-    options.path = '/repos/urfu-2016/' + task;
+    OPTIONS.path = REPOS + task;
     makeRequest(callback);
 };
 
 exports.getReadMe = function (task, callback) {
-    options.path = '/repos/urfu-2016/' + task + '/readme';
+    OPTIONS.path = REPOS + task + '/readme';
     makeRequest(callback);
 };
 
