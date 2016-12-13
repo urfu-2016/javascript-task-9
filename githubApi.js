@@ -8,7 +8,12 @@ var PATH_TO_REPO = '/urfu-2016/';
 var PATH_TO_TOKEN = 'token.txt';
 var USER_AGENT = 'My-Awesome-github-api';
 
-var TOKEN = fs.existsSync(PATH_TO_TOKEN) ? fs.readFileSync(PATH_TO_TOKEN) : '';
+var TOKEN;
+try {
+    TOKEN = fs.readFileSync(PATH_TO_TOKEN);
+} catch (e) {
+    TOKEN = '';
+}
 
 function buildOptions(apiMethod, apiParam) {
     return {
@@ -49,35 +54,57 @@ function makeJsonCallback(callback) {
     };
 }
 
-exports.getRepoInfo = function (repo, callback) {
-    var request = https.request(buildOptions('repos', repo),
-        getSubscriberToReadData(makeJsonCallback(callback)));
+function makeHttpRequest(apiMethod, apiParam, callback) {
+    var request = https.request(buildOptions(apiMethod, apiParam),
+        getSubscriberToReadData(callback));
     request.end();
+}
+
+exports.getRepoInfo = function (repo, callback) {
+    makeHttpRequest('repos', repo, makeJsonCallback(callback));
+    // var request = https.request(buildOptions('repos', repo),
+    //     getSubscriberToReadData(makeJsonCallback(callback)));
+    // request.end();
 };
 
 exports.getRepoReadme = function (repo, callback) {
-    var request = https.request(buildOptions('repos', repo + '/readme'),
-        getSubscriberToReadData(function (error, result) {
-            if (error) {
-                callback(error);
+    makeHttpRequest('repos', repo + '/readme', function (error, result) {
+        if (error) {
+            callback(error);
 
-                return;
-            }
-            try {
-                var readmeInfo = JSON.parse(result);
-                callback(null, new Buffer(readmeInfo.content, readmeInfo.encoding)
-                    .toString('utf-8'));
-            } catch (e) {
-                callback(e);
-            }
-        }));
-    request.end();
+            return;
+        }
+        try {
+            var readmeInfo = JSON.parse(result);
+            callback(null, new Buffer(readmeInfo.content, readmeInfo.encoding)
+                .toString('utf-8'));
+        } catch (e) {
+            callback(e);
+        }
+    });
+    // var request = https.request(buildOptions('repos', repo + '/readme'),
+    //     getSubscriberToReadData(function (error, result) {
+    //         if (error) {
+    //             callback(error);
+
+    //             return;
+    //         }
+    //         try {
+    //             var readmeInfo = JSON.parse(result);
+    //             callback(null, new Buffer(readmeInfo.content, readmeInfo.encoding)
+    //                 .toString('utf-8'));
+    //         } catch (e) {
+    //             callback(e);
+    //         }
+    //     }));
+    // request.end();
 };
 
 exports.getRepoList = function (callback) {
-    var request = https.request(buildOptions('orgs', 'repos'),
-        getSubscriberToReadData(makeJsonCallback(callback)));
-    request.end();
+    makeHttpRequest('orgs', 'repos', makeJsonCallback(callback));
+    // var request = https.request(buildOptions('orgs', 'repos'),
+    //     getSubscriberToReadData(makeJsonCallback(callback)));
+    // request.end();
 };
 
 exports.parseMarkdown = function (markdown, callback) {

@@ -36,8 +36,7 @@ exports.getList = function (category, callback) {
 
             return;
         }
-        callback(null, results
-        .filter(function (result) {
+        callback(null, results.filter(function (result) {
             return result.name.startsWith(category + '-task-');
         })
         .map(formatRepoInfo));
@@ -52,26 +51,27 @@ exports.getList = function (category, callback) {
 exports.loadOne = function (task, callback) {
     flow.serial([
         githubApi.getRepoInfo.bind(null, task),
-        function (repoInfo, innerCallback) {
+        function (repoInfo, next) {
             githubApi.getRepoReadme(repoInfo.name, function (error, result) {
                 if (error) {
-                    innerCallback(error);
+                    next(error);
 
                     return;
                 }
                 repoInfo.markdown = result;
-                innerCallback(null, repoInfo);
+                next(null, repoInfo);
             });
         },
-        function (repoInfo, innerCallback) {
+        function (repoInfo, next) {
             githubApi.parseMarkdown(repoInfo.markdown, function (error, result) {
                 if (error) {
-                    innerCallback(error);
+                    next(error);
 
                     return;
                 }
                 repoInfo.html = result;
-                innerCallback(null, formatRepoInfo(repoInfo));
+                next(null, formatRepoInfo(repoInfo));
             });
-        }], callback);
+        }
+    ], callback);
 };
