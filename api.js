@@ -6,7 +6,7 @@ function getToken() {
     try {
         token = '?access_token=' + fs.readFileSync('token.txt', 'utf8');
     } catch (err) {
-        console.info(1);
+        console.info('Токен не найден');
     }
 
     return token;
@@ -18,7 +18,8 @@ function getOptions(path) {
         host: 'api.github.com',
         path: path + getToken(),
         method: 'get',
-        headers: { 'user-agent': 'BratBratokBratishka' }
+        headers: { 'user-agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko)
+        Chrome/54.0.2840.99 Safari/537.36' }
     };
 }
 

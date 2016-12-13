@@ -32,24 +32,24 @@ exports.getList = function (category, callback) {
  */
 exports.loadOne = function (task, callback) {
     var result = {};
-    requestsAPI.request('/repos/urfu-2016/' + task + '/readme', function (err1, data1) {
-        requestsAPI.request('/repos/urfu-2016/' + task, function (err2, data2) {
-            if (err2) {
-                callback(err2, undefined);
+    requestsAPI.request('/repos/urfu-2016/' + task + '/readme', function (err_readme, readme_data) {
+        requestsAPI.request('/repos/urfu-2016/' + task, function (err_repo, repo_data) {
+            if (err_repo) {
+                callback(err_repo, undefined);
 
                 return;
             }
-            if (err1) {
-                callback(err1, undefined);
+            if (err_readme) {
+                callback(err_readme, undefined);
 
                 return;
             }
-            result.name = data2.name;
-            result.description = data2.description;
+            result.name = repo_data.name;
+            result.description = repo_data.description;
             callback(undefined, result);
         });
         try {
-            result.markdown = new Buffer(data1.content, 'base64').toString('utf-8');
+            result.markdown = new Buffer(readme_data.content, 'base64').toString('utf-8');
         } catch (err) {
             result.markdown = '';
         }
