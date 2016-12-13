@@ -20,9 +20,9 @@ var OPTIONS = {
     }
 };
 
-function makeRequest(callback) {
+function makeRequest(callback, copyOptions) {
     https
-        .request(OPTIONS, function (rCallback, response) {
+        .request(copyOptions, function (rCallback, response) {
             var buffer = new Buffer('', 'utf8');
             response.on('error', rCallback);
             response.on('data', function (chunk) {
@@ -36,18 +36,21 @@ function makeRequest(callback) {
 }
 
 exports.getList = function (callback) {
-    OPTIONS.path = ORG_REPOS;
-    makeRequest(callback);
+    var copy = Object.assign({}, OPTIONS);
+    copy.path = ORG_REPOS;
+    makeRequest(callback, copy);
 };
 
 exports.getRepository = function (task, callback) {
-    OPTIONS.path = REPOS + task;
-    makeRequest(callback);
+    var copy = Object.assign({}, OPTIONS);
+    copy.path = REPOS + task;
+    makeRequest(callback, copy);
 };
 
 exports.getReadMe = function (task, callback) {
-    OPTIONS.path = REPOS + task + '/readme';
-    makeRequest(callback);
+    var copy = Object.assign({}, OPTIONS);
+    copy.path = REPOS + task + '/readme';
+    makeRequest(callback, copy);
 };
 
 exports.downloadReadMe = function (url, callback) {
