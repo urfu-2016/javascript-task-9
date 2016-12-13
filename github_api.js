@@ -9,13 +9,13 @@ var PATH_SEPARATOR = '/';
 function createRequestOptions(path) {
     return {
         host: API_HOST,
-        path: PATH_SEPARATOR + path,
+        path: path,
         headers: { 'User-Agent': USER_AGENT }
     };
 }
 
 function joinApiPath() {
-    return [].slice.call(arguments).join(PATH_SEPARATOR);
+    return PATH_SEPARATOR + [].slice.call(arguments).join(PATH_SEPARATOR);
 }
 
 function fetchJson(path, callback) {
@@ -62,7 +62,7 @@ exports.getReadme = function (owner, repoName, callback) {
         }
 
         try {
-            var readmeMd = new Buffer(readme.content, readme.encoding).toString('utf-8');
+            var readmeMd = Buffer.from(readme.content, readme.encoding).toString('utf-8');
             callback(null, readmeMd);
         } catch (e) {
             callback(e);

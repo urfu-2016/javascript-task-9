@@ -41,7 +41,7 @@ exports.getList = function (category, callback) {
     });
 };
 
-function createTask(repo, callback) {
+function convertToTaskWithReadme(repo, callback) {
     github.getReadme(repo.owner.login, repo.name, function (err, readme) {
         if (err) {
             callback(err);
@@ -66,5 +66,5 @@ function createTask(repo, callback) {
 exports.loadOne = function (task, callback) {
     flow.serial([
         github.getRepo.bind(null, ORG_URFU, task),
-        createTask], callback);
+        convertToTaskWithReadme], callback);
 };
