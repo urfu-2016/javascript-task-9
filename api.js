@@ -18,8 +18,8 @@ function getOptions(path) {
         host: 'api.github.com',
         path: path + getToken(),
         method: 'get',
-        headers: { 'user-agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko)
-        Chrome/54.0.2840.99 Safari/537.36' }
+        headers: { 'user-agent':
+        'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36' }
     };
 }
 
