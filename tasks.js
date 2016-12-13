@@ -1,22 +1,10 @@
 'use strict';
 
 exports.isStar = true;
+var flow = require('flow');
 var GithubRepositoriesAPI = require('./api.js');
+
 var API = new GithubRepositoriesAPI('urfu-2016', 'token.txt');
-
-/**
- * Выбрать нужные поля
- * @param {Array<String>} fields - поля
- * @param {Object} task - объект со ВСЕМИ полями
- * @returns {Object} - полученный обрезок
- */
-function formatTask(fields, task) {
-    return fields.reduce(function (result, field) {
-        result[field] = task[field];
-
-        return result;
-    }, {});
-}
 
 /**
  * Получение списка задач
@@ -24,28 +12,47 @@ function formatTask(fields, task) {
  * @param {Function} callback
  */
 exports.getList = function (category, callback) {
-    API.getAllByCategory(category, function (error, data) {
+    API.getAllTasksInfoByCategory(category, function (error, data) {
         if (error) {
             callback(error);
         } else {
-            var fields = ['name', 'description'];
-            callback(null, data.map(formatTask.bind(null, fields)));
+            callback(null, data.map(function (repo) {
+                return { name: repo.name, description: repo.description };
+            }));
         }
     });
 };
 
 /**
  * Загрузка одной задачи
- * @param {String} task – идентификатор задачи
+ * @param {String} taskName – идентификатор задачи
  * @param {Function} callback
  */
-exports.loadOne = function (task, callback) {
-    API.getFullInfoById(task, function (error, data) {
-        if (error) {
-            callback(error);
-        } else {
-            var fields = ['name', 'description', 'markdown', 'html'];
-            callback(null, formatTask(fields, data));
+exports.loadOne = function (taskName, callback) {
+    var task = {};
+    flow.serial([
+        API.getTaskInfoByName.bind(global, taskName),
+
+        function (repository, cb) {
+            task.name = repository.name;
+            task.description = repository.description;
+            cb();
+        },
+
+        API.getTaskReadmeByName.bind(global, taskName),
+
+        function (markdown, cb) {
+            task.markdown = markdown;
+            cb();
+        },
+
+        function (cb) {
+            API.renderMarkdown(task.markdown, cb);
+        },
+
+        function (renderedMarkdown, cb) {
+            task.html = renderedMarkdown;
+            cb(null, task);
         }
-    });
+    ], callback);
 };
