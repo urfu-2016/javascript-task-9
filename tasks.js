@@ -45,8 +45,8 @@ exports.loadOne = function (task, callback) {
             requestApi.getRepoHtml(oneRepo.markdown, nextFunction);
         },
 
-        function (markdown, nextFunction) {
-            oneRepo.html = markdown;
+        function (html, nextFunction) {
+            oneRepo.html = html;
             nextFunction(null, oneRepo);
         }
     ], callback);

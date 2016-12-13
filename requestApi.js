@@ -17,9 +17,10 @@ function getAllRepos(callback) {
         if (err || response.statusCode !== 200) {
             callback(err || new Error('wrongs statusCode'));
         } else {
-            callback(null, JSON.parse(body).map(function (repo) {
+            var namesAndDescriptionsOfRepo = JSON.parse(body).map(function (repo) {
                 return { name: repo.name, description: repo.description };
-            }));
+            });
+            callback(null, namesAndDescriptionsOfRepo);
         }
     });
 }
@@ -29,9 +30,10 @@ exports.getReposByCategory = function (category, callback) {
         if (err) {
             callback(err);
         } else {
-            callback(null, data.filter(function (repo) {
+            var taskRepos = data.filter(function (repo) {
                 return repo.name.indexOf(category + '-task') !== -1;
-            }));
+            });
+            callback(null, taskRepos);
         }
     });
 };
@@ -43,7 +45,8 @@ exports.getOneRepo = function (name, callback) {
             callback(err || new Error('wrongs statusCode'));
         } else {
             var parsed = JSON.parse(body);
-            callback(null, { name: parsed.name, description: parsed.description });
+            var repoObject = { name: parsed.name, description: parsed.description };
+            callback(null, repoObject);
         }
     });
 };
