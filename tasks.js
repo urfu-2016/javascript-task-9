@@ -15,29 +15,27 @@ var flow = require('flow');
  */
 exports.getList = function (category, callback) {
     var result;
-    function extract(error, extracted) {
+    function extract(error, extractedList) {
         if (error) {
             callback(error, null);
         } else {
             var template = category + '-task';
             try {
-                extracted = JSON.parse(extracted);
+                extractedList = JSON.parse(extractedList);
             } catch (exception) {
                 callback(exception);
 
                 return;
             }
-            result = extracted
+            result = extractedList
                 .filter(function (task) {
                     return task.name.indexOf(template) === 0;
                 })
                 .map(function (repository) {
-                    var note = {
-                        'name': repository.name,
-                        'description': repository.description
+                    return {
+                        name: repository.name,
+                        description: repository.description
                     };
-
-                    return note;
                 });
             callback(error, result);
         }
@@ -53,49 +51,50 @@ exports.getList = function (category, callback) {
 exports.loadOne = function (task, callback) {
     flow.serial([
         function (next) {
-            githubAPI.getRepository(task, function (error, extracted) {
-                if (!error) {
-                    try {
-                        extracted = JSON.parse(extracted);
-                    } catch (exception) {
-                        next(exception);
-
-                        return;
-                    }
-                    var note = {
-                        'name': extracted.name,
-                        'description': extracted.description
-                    };
-                    next(null, note);
-                } else {
+            githubAPI.getRepository(task, function (error, extractedList) {
+                if (error) {
                     callback(error);
 
                     return;
                 }
+                try {
+                    extractedList = JSON.parse(extractedList);
+                } catch (exception) {
+                    next(exception);
+
+                    return;
+                }
+                var note = {
+                    name: extractedList.name,
+                    description: extractedList.description
+                };
+                next(null, note);
             });
         },
         function (note, next) {
             githubAPI.getReadMe(task, function (error, extracted) {
-                if (!error) {
-                    try {
-                        extracted = JSON.parse(extracted);
-                    } catch (exception) {
-                        next(exception);
+                if (error) {
+                    next(error);
+
+                    return;
+                }
+                try {
+                    extracted = JSON.parse(extracted);
+                } catch (exception) {
+                    next(exception);
+
+                    return;
+                }
+                var url = extracted.download_url;
+                githubAPI.downloadReadMe(url, function (internalError, markdown) {
+                    if (internalError) {
+                        next(internalError);
 
                         return;
                     }
-                    var url = extracted.download_url;
-                    githubAPI.downloadReadMe(url, function (internalError, markdown) {
-                        if (!internalError) {
-                            note.markdown = markdown;
-                            next(null, note);
-                        } else {
-                            next(internalError);
-                        }
-                    });
-                } else {
-                    next(error);
-                }
+                    note.markdown = markdown;
+                    next(null, note);
+                });
             });
         }
     ], callback);
