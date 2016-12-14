@@ -62,9 +62,6 @@ function makeHttpRequest(apiMethod, apiParam, callback) {
 
 exports.getRepoInfo = function (repo, callback) {
     makeHttpRequest('repos', repo, makeJsonCallback(callback));
-    // var request = https.request(buildOptions('repos', repo),
-    //     getSubscriberToReadData(makeJsonCallback(callback)));
-    // request.end();
 };
 
 exports.getRepoReadme = function (repo, callback) {
@@ -82,29 +79,10 @@ exports.getRepoReadme = function (repo, callback) {
             callback(e);
         }
     });
-    // var request = https.request(buildOptions('repos', repo + '/readme'),
-    //     getSubscriberToReadData(function (error, result) {
-    //         if (error) {
-    //             callback(error);
-
-    //             return;
-    //         }
-    //         try {
-    //             var readmeInfo = JSON.parse(result);
-    //             callback(null, new Buffer(readmeInfo.content, readmeInfo.encoding)
-    //                 .toString('utf-8'));
-    //         } catch (e) {
-    //             callback(e);
-    //         }
-    //     }));
-    // request.end();
 };
 
 exports.getRepoList = function (callback) {
     makeHttpRequest('orgs', 'repos', makeJsonCallback(callback));
-    // var request = https.request(buildOptions('orgs', 'repos'),
-    //     getSubscriberToReadData(makeJsonCallback(callback)));
-    // request.end();
 };
 
 exports.parseMarkdown = function (markdown, callback) {
