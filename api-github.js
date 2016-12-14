@@ -2,7 +2,7 @@
 
 var https = require('https');
 var fs = require('fs');
-var flow = require('./flow');
+var flow = require('flow');
 
 var API_GITHUB = 'api.github.com';
 var API_TOKEN = getToken();
@@ -52,34 +52,25 @@ function sendRequest(method, url, body, callback) {
     https.request(options, cb).end(body);
 }
 
-exports.getRepos = function (user, callback) {
-    var url = '/orgs/' + user + '/repos';
+function getJsonAsyns(url, callback) {
     flow.serial([
         sendRequest.bind(null, 'GET', url, null),
         ASYNS_JSON_PARSE
-    ], callback
-    );
+    ], callback);
+}
+
+exports.getReposAsync = function (user, callback) {
+    getJsonAsyns('/orgs/' + user + '/repos', callback);
 };
 
-exports.getRepo = function (user, repo, callback) {
-    var url = '/repos/' + user + '/' + repo;
-    flow.serial([
-        sendRequest.bind(null, 'GET', url, null),
-        ASYNS_JSON_PARSE
-    ], callback
-    );
+exports.getRepoAsync = function (user, repo, callback) {
+    getJsonAsyns('/repos/' + user + '/' + repo, callback);
 };
 
-exports.getReadme = function (user, repo, callback) {
-    var url = '/repos/' + user + '/' + repo + '/readme';
-    flow.serial([
-        sendRequest.bind(null, 'GET', url, null),
-        ASYNS_JSON_PARSE
-    ], callback
-    );
+exports.getReadmeAsync = function (user, repo, callback) {
+    getJsonAsyns('/repos/' + user + '/' + repo + '/readme', callback);
 };
 
 exports.readmeToHtml = function (readme, callback) {
-    var url = '/markdown/raw';
-    sendRequest('POST', url, readme, callback);
+    sendRequest('POST', '/markdown/raw', readme, callback);
 };
