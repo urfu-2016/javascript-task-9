@@ -12,6 +12,7 @@ var TOKEN;
 try {
     TOKEN = fs.readFileSync(PATH_TO_TOKEN);
 } catch (e) {
+    console.error(e);
     TOKEN = '';
 }
 
@@ -35,7 +36,11 @@ function getSubscriberToReadData(callback) {
         });
 
         request.on('end', function () {
-            callback(null, data);
+            if (request.statusCode === 200) {
+                callback(null, data);
+            } else {
+                callback(data);
+            }
         });
     };
 }
