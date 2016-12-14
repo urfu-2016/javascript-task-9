@@ -48,7 +48,7 @@ exports.loadOne = function (task, callback) {
                     name: repo.name,
                     description: repo.description
                 };
-            }, next))
+            }, next));
         },
 
         function (repo, next) {
@@ -56,7 +56,7 @@ exports.loadOne = function (task, callback) {
                 repo.markdown = new Buffer(readme.content, readme.encoding).toString('utf-8');
 
                 return repo;
-            }, next))
+            }, next));
         },
 
         function (repo, next) {
@@ -64,7 +64,7 @@ exports.loadOne = function (task, callback) {
                 repo.html = html;
 
                 return repo;
-            }, next))
+            }, next));
         }
     ], callback);
 };
