@@ -7,7 +7,7 @@ var flow = require('flow');
  * Сделано задание на звездочку
  * Реализовано получение html
  */
-exports.isStar = false;
+exports.isStar = true;
 
 /**
  * Получение списка задач
@@ -58,6 +58,17 @@ exports.loadOne = function (task, callback) {
                 } catch (e) {
                     result.markdown = '';
                     console.info('bad content');
+                }
+                next(error, result);
+            });
+        },
+        function (results, next) {
+            githubApi.getHTML(result.markdown, ORGANIZATION, function (error, data) {
+                try {
+                    result.html = data;
+                } catch (e) {
+                    result.html = '';
+                    console.info('bad html');
                 }
                 next(error, result);
             });
