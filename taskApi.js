@@ -52,7 +52,11 @@ function getOptions(url, post) {
     }
     if (post) {
         options.method = 'POST';
-        options.headers['Content-Type'] = 'text/plain';
+        options.headers = {
+            'authorization': TOKEN,
+            'User-Agent': 'zeaceApp',
+            'Content-Type': 'text/plain'
+        };
     }
 
     return options;
