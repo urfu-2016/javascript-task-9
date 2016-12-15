@@ -17,10 +17,16 @@ function getAllRepos(callback) {
         if (err || response.statusCode !== 200) {
             callback(err || new Error('wrongs statusCode'));
         } else {
-            var namesAndDescriptionsOfRepo = JSON.parse(body).map(function (repo) {
-                return { name: repo.name, description: repo.description };
+            parseJson(body, function (error, parsed) {
+                if (error) {
+                    callback(error);
+                } else {
+                    var namesAndDescriptionsOfRepo = parsed.map(function (repo) {
+                        return { name: repo.name, description: repo.description };
+                    });
+                    callback(null, namesAndDescriptionsOfRepo);
+                }
             });
-            callback(null, namesAndDescriptionsOfRepo);
         }
     });
 }
@@ -44,13 +50,26 @@ exports.getOneRepo = function (name, callback) {
         if (err || response.statusCode !== 200) {
             callback(err || new Error('wrongs statusCode'));
         } else {
-            var parsed = JSON.parse(body);
-            var repoObject = { name: parsed.name, description: parsed.description };
-            callback(null, repoObject);
+            parseJson(body, function (error, parsed) {
+                if (error) {
+                    callback(error);
+                } else {
+                    var repoObject = { name: parsed.name, description: parsed.description };
+                    callback(null, repoObject);
+                }
+            });
         }
     });
 };
 
+function parseJson(body, callback) {
+    try {
+        var parsed = JSON.parse(body);
+        callback(null, parsed);
+    } catch (err) {
+        callback(err);
+    }
+}
 
 exports.getRepoMarkdown = function (name, callback) {
     var options = createOptions('https://api.github.com/repos/urfu-2016/' + name + '/readme');
@@ -58,9 +77,14 @@ exports.getRepoMarkdown = function (name, callback) {
         if (err || response.statusCode !== 200) {
             callback(err || new Error('wrongs statusCode'));
         } else {
-            var parsed = JSON.parse(body);
-            var buffer = new Buffer(parsed.content, parsed.encoding);
-            callback(null, { markdown: buffer.toString('utf-8') });
+            parseJson(body, function (error, parsed) {
+                if (error) {
+                    callback(error);
+                } else {
+                    var buffer = new Buffer(parsed.content, parsed.encoding);
+                    callback(null, { markdown: buffer.toString('utf-8') });
+                }
+            });
         }
     });
 };
