@@ -6,14 +6,19 @@
  */
 exports.isStar = false;
 
-function checkData(data) {
-    if (JSON.parse(data).message === 'Not Found') {
+var flow = require('flow');
+var gitapi = require('./gitapi');
+
+function parseData(data) {
+    var parsedData = JSON.parse(data);
+    if (parsedData.message === 'Not Found') {
         throw new Error('Incorrect Repository');
     }
+
+    return parsedData;
 }
 
 function getRepositoryInfo(path, handleData, callback) {
-    var gitapi = require('./gitapi');
     gitapi.repositoryRequest(path, function (err, data) {
         if (err) {
             callback(err);
@@ -21,8 +26,8 @@ function getRepositoryInfo(path, handleData, callback) {
             var handledData;
             var error;
             try {
-                checkData(data);
-                handledData = handleData(data);
+                var parsedData = parseData(data);
+                handledData = handleData(parsedData);
             } catch (handleError) {
                 error = handleError;
             }
@@ -33,16 +38,14 @@ function getRepositoryInfo(path, handleData, callback) {
 
 function orgsRepositoriesHandle(repositoryProps, category) {
     return function (data) {
-        var parsedData = JSON.parse(data).map(function (record) {
-            var newRecord = {};
-            repositoryProps.forEach(function (property) {
+        return data.map(function (record) {
+            return repositoryProps.reduce(function (newRecord, property) {
                 newRecord[property] = record[property];
-            });
 
-            return newRecord;
-        });
+                return newRecord;
+            }, {});
 
-        return parsedData.filter(function (record) {
+        }).filter(function (record) {
             return record.name.indexOf(category) !== -1;
         });
     };
@@ -50,8 +53,7 @@ function orgsRepositoriesHandle(repositoryProps, category) {
 
 function readmeInfoHandle() {
     return function (data) {
-        var parsedData = JSON.parse(data);
-        var content = new Buffer(parsedData.content, 'base64')
+        var content = new Buffer(data.content, 'base64')
             .toString('utf8');
 
         return { name: 'markdown', value: content };
@@ -61,9 +63,8 @@ function readmeInfoHandle() {
 function repositoryInfoHandle(repositoryProps) {
     return function (data) {
         var newRecord = {};
-        var record = JSON.parse(data);
         repositoryProps.forEach(function (property) {
-            newRecord[property] = record[property];
+            newRecord[property] = data[property];
         });
 
         return newRecord;
@@ -89,7 +90,6 @@ exports.getList = function (category, callback) {
  * @param {Function} callback
  */
 exports.loadOne = function (task, callback) {
-    var flow = require('./flow');
     flow.serial([
         function (next) {
             var path = '/repos/urfu-2016/' + task;

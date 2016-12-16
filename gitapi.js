@@ -1,9 +1,9 @@
 'use strict';
 
+var fs = require('fs');
 var HOSTNAME = 'api.github.com';
 
 function getToken() {
-    var fs = require('fs');
     var token;
     try {
         token = fs.readFileSync('token.txt', 'utf-8').trim();

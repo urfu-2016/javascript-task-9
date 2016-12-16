@@ -52,5 +52,4 @@ tasks.loadOne('javascript-task-1', function (err, task) {
 
 function handleError(err) {
     console.error(err);
-    // console.info(err.stack);
 }
