@@ -11,21 +11,21 @@ try {
     console.info('token not found');
 }
 
-function sendRequest(url, post, markdown, callback) {
-    var request = https.request(getOptions(url, post));
+function sendRequest(url, params, callback) {
+    var request = https.request(getOptions(url, params.method));
     request.on('response', function (response) {
         var body = '';
         response.on('data', function (chunk) {
             body += chunk;
         });
         response.on('end', function () {
-            if (response.statusCode === 200 && post) {
+            if (response.statusCode === 200 && params.method) {
                 try {
                     callback(null, body);
                 } catch (e) {
                     callback(e);
                 }
-            } else if (response.statusCode === 200 && !post) {
+            } else if (response.statusCode === 200 && !params.method) {
                 try {
                     callback(null, JSON.parse(body));
                 } catch (e) {
@@ -37,7 +37,7 @@ function sendRequest(url, post, markdown, callback) {
         });
     });
     request.on('error', callback);
-    request.end(markdown);
+    request.end(params.write);
 }
 
 function getOptions(url, post) {
@@ -64,19 +64,19 @@ function getOptions(url, post) {
 
 exports.getRepos = function (org, callback) {
     var url = '/orgs/' + org + '/repos';
-    sendRequest(url, false, false, callback);
+    sendRequest(url, { method: false, write: false }, callback);
 };
 
 exports.getRepoInfo = function (task, org, callback) {
     var url = '/repos/' + org + '/' + task;
-    sendRequest(url, false, false, callback);
+    sendRequest(url, { method: false, write: false }, callback);
 };
 
 exports.getReadMe = function (task, org, callback) {
     var url = '/repos/' + org + '/' + task + '/readme';
-    sendRequest(url, false, false, callback);
+    sendRequest(url, { method: false, write: false }, callback);
 };
 
-exports.getHTML = function (markdown, org, callback) {
-    sendRequest(POST_PATH, true, markdown, callback);
+exports.getHTML = function (markdown, callback) {
+    sendRequest(POST_PATH, { method: true, write: markdown }, callback);
 };

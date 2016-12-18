@@ -18,15 +18,13 @@ exports.isStar = true;
 var ORGANIZATION = 'urfu-2016';
 
 exports.getList = function (category, callback) {
-    // var result = [];
     githubApi.getRepos(ORGANIZATION, function (err, data) {
         if (err) {
             callback(err, null);
         }
-        var arr = data.filter(function (task) {
+        var result = data.filter(function (task) {
             return task.name.indexOf(category + '-task') !== -1;
-        });
-        var result = arr.map(function (task) {
+        }).map(function (task) {
             return { name: task.name, description: task.description };
         });
         callback(err, result);
@@ -63,7 +61,7 @@ exports.loadOne = function (task, callback) {
             });
         },
         function (results, next) {
-            githubApi.getHTML(result.markdown, ORGANIZATION, function (error, data) {
+            githubApi.getHTML(result.markdown, function (error, data) {
                 try {
                     result.html = data;
                 } catch (e) {
