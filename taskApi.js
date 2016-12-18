@@ -12,21 +12,21 @@ try {
 }
 
 function sendRequest(url, options, callback) {
-    options = Object.assign({}, { method: false, write: false }, options);
-    var request = https.request(getOptions(url, options.method));
+    options = Object.assign({}, { post: false, write: false }, options);
+    var request = https.request(getOptions(url, options.post));
     request.on('response', function (response) {
         var body = '';
         response.on('data', function (chunk) {
             body += chunk;
         });
         response.on('end', function () {
-            if (response.statusCode === 200 && options.method) {
+            if (response.statusCode === 200 && options.post) {
                 try {
                     callback(null, body);
                 } catch (e) {
                     callback(e);
                 }
-            } else if (response.statusCode === 200 && !options.method) {
+            } else if (response.statusCode === 200 && !options.post) {
                 try {
                     callback(null, JSON.parse(body));
                 } catch (e) {
@@ -79,5 +79,5 @@ exports.getReadMe = function (task, org, callback) {
 };
 
 exports.getHTML = function (markdown, callback) {
-    sendRequest(POST_PATH, { method: true, write: markdown }, callback);
+    sendRequest(POST_PATH, { post: true, write: markdown }, callback);
 };
