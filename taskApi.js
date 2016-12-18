@@ -11,21 +11,22 @@ try {
     console.info('token not found');
 }
 
-function sendRequest(url, params, callback) {
-    var request = https.request(getOptions(url, params.method));
+function sendRequest(url, options, callback) {
+    options = Object.assign({}, { method: false, write: false }, options);
+    var request = https.request(getOptions(url, options.method));
     request.on('response', function (response) {
         var body = '';
         response.on('data', function (chunk) {
             body += chunk;
         });
         response.on('end', function () {
-            if (response.statusCode === 200 && params.method) {
+            if (response.statusCode === 200 && options.method) {
                 try {
                     callback(null, body);
                 } catch (e) {
                     callback(e);
                 }
-            } else if (response.statusCode === 200 && !params.method) {
+            } else if (response.statusCode === 200 && !options.method) {
                 try {
                     callback(null, JSON.parse(body));
                 } catch (e) {
@@ -37,7 +38,7 @@ function sendRequest(url, params, callback) {
         });
     });
     request.on('error', callback);
-    request.end(params.write);
+    request.end(options.write);
 }
 
 function getOptions(url, post) {
@@ -64,17 +65,17 @@ function getOptions(url, post) {
 
 exports.getRepos = function (org, callback) {
     var url = '/orgs/' + org + '/repos';
-    sendRequest(url, { method: false, write: false }, callback);
+    sendRequest(url, {}, callback);
 };
 
 exports.getRepoInfo = function (task, org, callback) {
     var url = '/repos/' + org + '/' + task;
-    sendRequest(url, { method: false, write: false }, callback);
+    sendRequest(url, {}, callback);
 };
 
 exports.getReadMe = function (task, org, callback) {
     var url = '/repos/' + org + '/' + task + '/readme';
-    sendRequest(url, { method: false, write: false }, callback);
+    sendRequest(url, {}, callback);
 };
 
 exports.getHTML = function (markdown, callback) {
